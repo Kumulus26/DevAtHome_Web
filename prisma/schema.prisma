@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  firstName   String    @db.VarChar(100)
+  lastName    String    @db.VarChar(100)
+  email       String    @unique @db.VarChar(255)
+  dateOfBirth DateTime  @db.Date
+  password    String    @db.VarChar(255)
+  createdAt   DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model fomapan400hc110 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model fomapan400ilfosol3 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model fomapan400ilfoteclc29 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model fomapan400rodinal {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model fomapan400tmaxdev {
+  id        Int     @id @default(autoincrement())
+  film      String? @db.VarChar(50)
+  developer String? @db.VarChar(50)
+  dilution  String? @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm String? @db.VarChar(10)
+  temp      String? @db.VarChar(10)
+}
+
+model hp5hc110 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model hp5ilfosol3 {
+  id        Int      @id(map: "hp5ilfosol3_data_pkey") @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model hp5ilfoteclc29 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model hp5rodinal {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model hp5tmaxdev {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model rpx400hc110 {
+  id          Int     @id @default(autoincrement())
+  film        String  @db.VarChar(100)
+  developer   String  @db.VarChar(50)
+  dilution    String  @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   Decimal @db.Decimal(5, 2)
+  temperature String  @db.VarChar(10)
+}
+
+model rpx400ilfosol3 {
+  id          Int     @id @default(autoincrement())
+  film        String  @db.VarChar(100)
+  developer   String  @db.VarChar(50)
+  dilution    String  @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   Decimal @db.Decimal(5, 2)
+  temperature String  @db.VarChar(10)
+}
+
+model rpx400ilfoteclc29 {
+  id          Int     @id @default(autoincrement())
+  film        String  @db.VarChar(100)
+  developer   String  @db.VarChar(50)
+  dilution    String  @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   Decimal @db.Decimal(5, 2)
+  temperature String  @db.VarChar(10)
+}
+
+model rpx400tmaxdev {
+  id          Int     @id @default(autoincrement())
+  film        String  @db.VarChar(100)
+  developer   String  @db.VarChar(50)
+  dilution    String  @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   Decimal @db.Decimal(5, 2)
+  temperature String  @db.VarChar(10)
+}
+
+model tmax400hc110 {
+  id        Int     @id @default(autoincrement())
+  film      String? @db.VarChar(50)
+  developer String? @db.VarChar(50)
+  dilution  String? @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm String? @db.VarChar(10)
+  temp      String? @db.VarChar(10)
+}
+
+model tmax400ilfosol3 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model tmax400ilfoteclc29 {
+  id        Int      @id(map: "tmaxilfoteclc29_pkey") @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model tmax400rodinal {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model tmax400tmaxdev {
+  id        Int      @id(map: "tmaxtmaxdev_pkey") @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model trix400hc110 {
+  id          Int    @id @default(autoincrement())
+  film        String @db.VarChar(100)
+  developer   String @db.VarChar(50)
+  dilution    String @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   String @db.VarChar(20)
+  temperature String @db.VarChar(10)
+}
+
+model trix400ilfosol3 {
+  id          Int     @id @default(autoincrement())
+  film        String  @db.VarChar(100)
+  developer   String  @db.VarChar(50)
+  dilution    String  @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   Decimal @db.Decimal(5, 2)
+  temperature String  @db.VarChar(10)
+}
+
+model trix400ilfoteclc29 {
+  id          Int    @id @default(autoincrement())
+  film        String @db.VarChar(100)
+  developer   String @db.VarChar(50)
+  dilution    String @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   String @db.VarChar(20)
+  temperature String @db.VarChar(10)
+}
+
+model trix400rodinal {
+  id          Int     @id @default(autoincrement())
+  film        String  @db.VarChar(100)
+  developer   String  @db.VarChar(50)
+  dilution    String  @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   Decimal @db.Decimal(5, 2)
+  temperature String  @db.VarChar(10)
+}
+
+model trix400tmaxdev {
+  id          Int    @id @default(autoincrement())
+  film        String @db.VarChar(100)
+  developer   String @db.VarChar(50)
+  dilution    String @db.VarChar(10)
+  asa_iso     Int
+  time_35mm   String @db.VarChar(20)
+  temperature String @db.VarChar(10)
+}
