@@ -11,7 +11,6 @@ export default function Home() {
   const [showSignUp, setShowSignUp] = useState(false)
   const [user, setUser] = useState(null)
 
-  // Check if user is logged in on component mount
   useEffect(() => {
     const loggedInUser = localStorage.getItem('user')
     if (loggedInUser) {

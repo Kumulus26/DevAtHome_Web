@@ -7,7 +7,6 @@ export default function Navbar({ onLoginClick }) {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    // Check for user data when component mounts and when localStorage changes
     const checkUser = () => {
       const loggedInUser = localStorage.getItem('user')
       if (loggedInUser) {

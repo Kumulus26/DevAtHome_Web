@@ -13,7 +13,6 @@ export default function Timer() {
   const [timeLeft, setTimeLeft] = useState(0)
   const [currentProcess, setCurrentProcess] = useState('developer')
 
-  // Create beep function using Web Audio API
   const beep = () => {
     const context = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = context.createOscillator();
@@ -42,7 +41,6 @@ export default function Timer() {
     if (timeLeft > 0 && isTimerRunning) {
       const timer = setInterval(() => {
         setTimeLeft(prev => {
-          // Play beep sound every 30 seconds for Developer process
           if (currentProcess === 'developer' && prev % 30 === 0 && prev !== processes.developer.time) {
             try {
               beep();
@@ -98,10 +96,8 @@ export default function Timer() {
     setIsTimerRunning(false)
   }
 
-  // Update the Play/Pause button click handler
   const handlePlayPause = () => {
     if (!isTimerRunning) {
-      // Initialize audio on first play
       try {
         const context = new (window.AudioContext || window.webkitAudioContext)();
         context.resume();
@@ -136,7 +132,6 @@ export default function Timer() {
     <div className="min-h-screen bg-zinc-200 flex items-center justify-center p-6">
       <div className="w-full max-w-lg">
         {!selectedISO ? (
-          // ISO Selection Screen
           <div className="text-black text-center">
             <h2 className="text-3xl font-light mb-12">
               At what ISO did you shoot your film?
@@ -156,9 +151,7 @@ export default function Timer() {
             </div>
           </div>
         ) : (
-          // Timer Screen - Matching the picture exactly
           <div className="w-full">
-            {/* Process Selection Buttons */}
             <div className="flex justify-center gap-4 mb-6">
               {Object.entries(processes).map(([key, { name }]) => (
                 <button
@@ -174,9 +167,7 @@ export default function Timer() {
               ))}
             </div>
 
-            {/* Timer Container */}
             <div className="bg-black rounded-[2rem] p-8 flex items-center justify-between shadow-xl">
-              {/* Left side - Timer and Stop button */}
               <div className="flex-1">
                 <div className="text-gray-400 text-xl mb-2">Timer</div>
                 <div className="text-white text-7xl font-light tracking-wider mb-4">
@@ -194,10 +185,8 @@ export default function Timer() {
                 </button>
               </div>
 
-              {/* Right side - Progress Circle and Play/Pause Button */}
               <div className="relative">
                 <div className="w-32 h-32 rounded-2xl bg-[#0f2936] relative overflow-hidden">
-                  {/* Progress Circle */}
                   <svg className="absolute inset-0 w-full h-full rotate-[-90deg]">
                     <circle
                       cx="64"
@@ -211,7 +200,6 @@ export default function Timer() {
                       className="transition-all duration-1000"
                     />
                   </svg>
-                  {/* Play/Pause Button */}
                   <button
                     onClick={handlePlayPause}
                     className="absolute inset-0 flex items-center justify-center"
@@ -224,7 +212,6 @@ export default function Timer() {
               </div>
             </div>
 
-            {/* Bottom Indicator */}
             <div className="mt-4 flex justify-center">
               <div className="w-32 h-1 bg-black rounded-full"></div>
             </div>
