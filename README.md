@@ -35,7 +35,7 @@ Suivez ces étapes pour exécuter le projet en local :
 
 1. Clonez le dépôt :
    ```bash
-   git clone https://github.com/votre-utilisateur/devathome.git
+   git clone https://github.com/kumulus26/devathome.git
    ```
 2. Accédez au répertoire du projet :
    ```bash
