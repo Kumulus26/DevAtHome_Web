@@ -1,46 +1,44 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function Timer() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [selectedISO, setSelectedISO] = useState(null)
-  const [error, setError] = useState(false)
-  const [developmentTime, setDevelopmentTime] = useState(null)
-  const [isTimerRunning, setIsTimerRunning] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(0)
-  const [currentProcess, setCurrentProcess] = useState('developer')
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const selectedFilm = searchParams.get('film');
+  const selectedDeveloper = searchParams.get('developer');
+
+  const [selectedISO, setSelectedISO] = useState(null);
+  const [error, setError] = useState(false);
+  const [developmentTime, setDevelopmentTime] = useState(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [currentProcess, setCurrentProcess] = useState('developer');
 
   const beep = () => {
     const context = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = context.createOscillator();
     const gain = context.createGain();
-    
     oscillator.connect(gain);
     gain.connect(context.destination);
-    
     oscillator.frequency.value = 800;
     gain.gain.value = 0.1;
-    
     oscillator.start(context.currentTime);
     oscillator.stop(context.currentTime + 0.1);
   };
 
-  const selectedFilm = searchParams.get('film')
-  const selectedDeveloper = searchParams.get('developer')
-
   const processes = {
     developer: { name: 'Developer', time: developmentTime ? developmentTime * 60 : 0 },
     stopBath: { name: 'Stop Bath', time: 60 },
-    fixer: { name: 'Fixer', time: 300 }
-  }
+    fixer: { name: 'Fixer', time: 300 },
+  };
 
   useEffect(() => {
     if (timeLeft > 0 && isTimerRunning) {
       const timer = setInterval(() => {
-        setTimeLeft(prev => {
+        setTimeLeft((prev) => {
           if (currentProcess === 'developer' && prev % 30 === 0 && prev !== processes.developer.time) {
             try {
               beep();
@@ -55,46 +53,34 @@ export default function Timer() {
     }
   }, [timeLeft, isTimerRunning, currentProcess, processes.developer.time]);
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-  }
-
-  const calculateProgress = () => {
-    const totalTime = processes[currentProcess].time
-    return ((totalTime - timeLeft) / totalTime) * 100
-  }
-
   const handleISOSelect = async (iso) => {
-    setSelectedISO(iso)
+    setSelectedISO(iso);
     try {
       const response = await fetch('/api/development-time', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ film: selectedFilm, developer: selectedDeveloper, iso }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (!response.ok) {
-        setError(true)
-        throw new Error(data.error)
+        throw new Error(data.error);
       }
 
-      setDevelopmentTime(data.time)
-      setTimeLeft(data.time * 60)
-      setCurrentProcess('developer')
+      setDevelopmentTime(data.time);
+      setTimeLeft(data.time * 60);
+      setCurrentProcess('developer');
     } catch (error) {
-      console.error('Error:', error)
-      setError(true)
+      console.error('Error:', error);
+      setError(true);
     }
-  }
+  };
 
   const handleProcessSelect = (process) => {
-    setCurrentProcess(process)
-    setTimeLeft(processes[process].time)
-    setIsTimerRunning(false)
-  }
+    setCurrentProcess(process);
+    setTimeLeft(processes[process].time);
+    setIsTimerRunning(false);
+  };
 
   const handlePlayPause = () => {
     if (!isTimerRunning) {
@@ -106,6 +92,12 @@ export default function Timer() {
       }
     }
     setIsTimerRunning(!isTimerRunning);
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   if (error) {
@@ -125,7 +117,7 @@ export default function Timer() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -175,8 +167,8 @@ export default function Timer() {
                 </div>
                 <button
                   onClick={() => {
-                    setTimeLeft(processes[currentProcess].time)
-                    setIsTimerRunning(false)
+                    setTimeLeft(processes[currentProcess].time);
+                    setIsTimerRunning(false);
                   }}
                   className="px-8 py-2 bg-zinc-800 text-white rounded-full
                            hover:bg-zinc-700 transition-colors"
@@ -196,7 +188,7 @@ export default function Timer() {
                       strokeWidth="8"
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 56}`}
-                      strokeDashoffset={`${2 * Math.PI * 56 * (1 - calculateProgress() / 100)}`}
+                      strokeDashoffset={`${2 * Math.PI * 56 * (1 - (processes[currentProcess].time - timeLeft) / processes[currentProcess].time)}`}
                       className="transition-all duration-1000"
                     />
                   </svg>
@@ -219,5 +211,5 @@ export default function Timer() {
         )}
       </div>
     </div>
-  )
-} 
+  );
+}
