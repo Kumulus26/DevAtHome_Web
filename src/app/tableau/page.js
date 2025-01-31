@@ -106,24 +106,21 @@ export default function Tableau() {
 
   const handleFilmSelect = (filmId) => {
     setSelectedFilm(filmId)
-    setSelectedDeveloper('')  // Reset developer selection when film changes
+    setSelectedDeveloper('')
   }
 
   const handleDeveloperSelect = (developerId) => {
     setSelectedDeveloper(developerId)
     setShowLoader(true)
     
-    // Find the selected film and developer objects
     const selectedFilmObj = films.find(film => film.id === selectedFilm)
     const selectedDeveloperObj = developers.find(dev => dev.id === developerId)
     
-    // Wait 2 seconds then redirect with the film and developer names
     setTimeout(() => {
       router.push(`/timer?film=${encodeURIComponent(selectedFilmObj.name)}&developer=${encodeURIComponent(selectedDeveloperObj.name)}`)
     }, 2000)
   }
 
-  // Update the renderImageGrid function to add better debugging and error handling
   const renderImageGrid = (items, selectedId, onSelect) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 w-full max-w-7xl mx-auto transform transition-all duration-1000">
       {items.map((item) => (

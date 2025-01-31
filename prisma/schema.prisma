@@ -7,16 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          Int       @id @default(autoincrement())
-  firstName   String    @db.VarChar(100)
-  lastName    String    @db.VarChar(100)
-  email       String    @unique @db.VarChar(255)
-  dateOfBirth DateTime  @db.Date
-  password    String    @db.VarChar(255)
-  createdAt   DateTime? @default(now()) @db.Timestamp(6)
-}
-
 model fomapan400hc110 {
   id        Int      @id @default(autoincrement())
   film      String?  @db.VarChar(50)
@@ -117,6 +107,72 @@ model hp5tmaxdev {
   temp      String?  @db.VarChar(10)
 }
 
+model tmax400hc110 {
+  id        Int     @id @default(autoincrement())
+  film      String? @db.VarChar(50)
+  developer String? @db.VarChar(50)
+  dilution  String? @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm String? @db.VarChar(10)
+  temp      String? @db.VarChar(10)
+}
+
+model tmax400ilfosol3 {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model tmax400rodinal {
+  id        Int      @id @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model tmax400tmaxdev {
+  id        Int      @id(map: "tmaxtmaxdev_pkey") @default(autoincrement())
+  film      String?  @db.VarChar(50)
+  developer String?  @db.VarChar(50)
+  dilution  String?  @db.VarChar(10)
+  asa_iso   Int?
+  time_35mm Decimal? @db.Decimal(5, 2)
+  temp      String?  @db.VarChar(10)
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  firstName     String    @db.VarChar(100)
+  lastName      String    @db.VarChar(100)
+  email         String    @unique @db.VarChar(255)
+  dateOfBirth   DateTime  @db.Date
+  password      String    @db.VarChar(255)
+  createdAt     DateTime? @default(now()) @db.Timestamp(6)
+  role          Role?     @default(USER)
+  username      String    @unique @db.VarChar(100)
+  bio           String?   @db.Text
+  profileImage  String?   @db.Text
+  photos        Photo[]
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  url       String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  title     String?
+  likes     Int      @default(0)
+  comments  Int      @default(0)
+} 
+
 model rpx400hc110 {
   id          Int     @id @default(autoincrement())
   film        String  @db.VarChar(100)
@@ -157,48 +213,8 @@ model rpx400tmaxdev {
   temperature String  @db.VarChar(10)
 }
 
-model tmax400hc110 {
-  id        Int     @id @default(autoincrement())
-  film      String? @db.VarChar(50)
-  developer String? @db.VarChar(50)
-  dilution  String? @db.VarChar(10)
-  asa_iso   Int?
-  time_35mm String? @db.VarChar(10)
-  temp      String? @db.VarChar(10)
-}
-
-model tmax400ilfosol3 {
-  id        Int      @id @default(autoincrement())
-  film      String?  @db.VarChar(50)
-  developer String?  @db.VarChar(50)
-  dilution  String?  @db.VarChar(10)
-  asa_iso   Int?
-  time_35mm Decimal? @db.Decimal(5, 2)
-  temp      String?  @db.VarChar(10)
-}
-
 model tmax400ilfoteclc29 {
   id        Int      @id(map: "tmaxilfoteclc29_pkey") @default(autoincrement())
-  film      String?  @db.VarChar(50)
-  developer String?  @db.VarChar(50)
-  dilution  String?  @db.VarChar(10)
-  asa_iso   Int?
-  time_35mm Decimal? @db.Decimal(5, 2)
-  temp      String?  @db.VarChar(10)
-}
-
-model tmax400rodinal {
-  id        Int      @id @default(autoincrement())
-  film      String?  @db.VarChar(50)
-  developer String?  @db.VarChar(50)
-  dilution  String?  @db.VarChar(10)
-  asa_iso   Int?
-  time_35mm Decimal? @db.Decimal(5, 2)
-  temp      String?  @db.VarChar(10)
-}
-
-model tmax400tmaxdev {
-  id        Int      @id(map: "tmaxtmaxdev_pkey") @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)
@@ -255,4 +271,9 @@ model trix400tmaxdev {
   asa_iso     Int
   time_35mm   String @db.VarChar(20)
   temperature String @db.VarChar(10)
+}
+
+enum Role {
+  USER
+  ADMIN
 }

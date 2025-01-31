@@ -5,10 +5,8 @@ export async function POST(request) {
   try {
     const { film, developer, iso } = await request.json()
 
-    // Debug log the received parameters
     console.log('Received parameters:', { film, developer, iso })
 
-    // Convert film names to match schema
     let filmName = ''
     if (film === 'Tri-X 400') filmName = 'trix'
     else if (film === 'T-MAX 400') filmName = 'tmax400'
@@ -23,7 +21,6 @@ export async function POST(request) {
       )
     }
 
-    // Convert developer names to match schema
     let devName = ''
     if (developer === 'T-MAX Dev') devName = 'tmaxdev'
     else if (developer === 'Rodinal') devName = 'rodinal'
@@ -38,11 +35,9 @@ export async function POST(request) {
       )
     }
 
-    // Construct table name to match schema exactly
     const tableName = `${filmName}${devName}`
     console.log('Looking up table:', tableName)
 
-    // Query the appropriate table
     const result = await prisma[tableName].findFirst({
       where: {
         asa_iso: iso
@@ -61,7 +56,6 @@ export async function POST(request) {
       )
     }
 
-    // Handle both string and decimal types for time_35mm
     const time = typeof result.time_35mm === 'string' 
       ? parseFloat(result.time_35mm) 
       : Number(result.time_35mm)

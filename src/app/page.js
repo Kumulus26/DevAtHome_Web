@@ -4,11 +4,13 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import Login from './login/page'
 import SignUp from './signup/page'
+import Settings from './settings/page'
 import Navbar from '@/components/Navbar'
 
 export default function Home() {
   const [showLogin, setShowLogin] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -28,14 +30,21 @@ export default function Home() {
     setShowSignUp(true)
   }
 
+  const handleSettingsClick = () => {
+    setShowSettings(true)
+  }
+
   const handleCloseModals = () => {
     setShowLogin(false)
     setShowSignUp(false)
+    setShowSettings(false)
   }
 
   return (
     <>
-      <div className={`min-h-screen relative overflow-hidden ${showLogin || showSignUp ? 'blur-sm transition-all duration-200' : ''}`}>
+      <div className={`min-h-screen relative overflow-hidden ${
+        showLogin || showSignUp || showSettings ? 'blur-sm transition-all duration-200' : ''
+      }`}>
         {/* Diagonal split background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-white"></div>
@@ -54,7 +63,10 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative">
-          <Navbar onLoginClick={handleLoginClick} />
+          <Navbar 
+            onLoginClick={handleLoginClick}
+            onSettingsClick={handleSettingsClick}
+          />
 
           {/* Main Content */}
           <main className="container mx-auto px-6 py-12">
@@ -104,6 +116,24 @@ export default function Home() {
           </main>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={handleCloseModals}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative"
+          >
+            <Settings 
+              isModal={true}
+              onClose={handleCloseModals}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Login Modal */}
       {showLogin && (

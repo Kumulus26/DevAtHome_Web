@@ -6,7 +6,6 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json()
 
-    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -16,6 +15,7 @@ export async function POST(request) {
         lastName: true,
         password: true,
         dateOfBirth: true,
+        username: true,
       }
     })
 
@@ -26,7 +26,6 @@ export async function POST(request) {
       )
     }
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password)
 
     if (!isValidPassword) {
@@ -36,7 +35,6 @@ export async function POST(request) {
       )
     }
 
-    // Remove password from response
     const { password: _, ...userWithoutPassword } = user
 
     return NextResponse.json(userWithoutPassword)

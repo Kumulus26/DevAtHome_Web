@@ -35,16 +35,14 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
         body: JSON.stringify(formData),
       })
 
-      const data = await response.json()
+      const userData = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
+        throw new Error(userData.error || 'Login failed')
       }
 
-      // Store user data in localStorage
-      localStorage.setItem('user', JSON.stringify(data))
+      localStorage.setItem('user', JSON.stringify(userData))
 
-      // Trigger a page reload to update the navbar
       if (isModal) {
         onClose?.()
         window.location.reload()

@@ -8,20 +8,25 @@ import { useState } from 'react'
 export default function SignUp({ isModal = false, onClose, onLoginClick }) {
   const router = useRouter()
   const [formData, setFormData] = useState({
+    username: '',
     firstName: '',
     lastName: '',
     email: '',
-    dateOfBirth: '',
     password: '',
+    confirmPassword: '',
+    dateOfBirth: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+    // Clear error when user starts typing again
+    if (error) setError('')
   }
 
   const handleSubmit = async (e) => {
@@ -29,25 +34,29 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
     setError('')
     setLoading(true)
 
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
     try {
+      const { confirmPassword, ...dataToSend } = formData // Remove confirmPassword from data to send
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
-        }),
+        body: JSON.stringify(dataToSend),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error creating account')
+        throw new Error(data.error || 'Failed to create account')
       }
 
-      // Success - redirect to login
       if (isModal) {
         onClose?.()
         onLoginClick?.()
@@ -70,7 +79,7 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
 
   return (
     <div 
-      className={`${isModal ? '' : 'min-h-screen bg-black'} flex items-start justify-center pt-24 p-6`}
+      className={`${isModal ? '' : 'min-h-screen bg-black'} flex items-start justify-center pt-6 p-6`}
       onClick={handleBackgroundClick}
     >
       <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
@@ -95,6 +104,18 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:border-white focus:ring-1 focus:ring-white transition-colors"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <input
                 type="text"
@@ -143,6 +164,28 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
                 name="password"
                 placeholder="Password"
                 value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:border-white focus:ring-1 focus:ring-white transition-colors"
+              />
+              
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="relative">
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:border-white focus:ring-1 focus:ring-white transition-colors"
