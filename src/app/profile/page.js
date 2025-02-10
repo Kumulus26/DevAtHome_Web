@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar'
 
 export default function Profile() {
   const router = useRouter()
-  const { user } = useUser()
+  const [user, setUser] = useState(null)
   const [bio, setBio] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -22,6 +22,8 @@ export default function Profile() {
         }
 
         const parsedUser = JSON.parse(loggedInUser)
+        setUser(parsedUser)
+        
         const response = await fetch(`/api/profile/${parsedUser.username}`)
         const data = await response.json()
 

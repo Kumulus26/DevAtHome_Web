@@ -12,7 +12,13 @@ export async function GET(request, { params }) {
         user: {
           select: {
             username: true,
-            profileImage: true
+            profileImage: true,
+            id: true
+          }
+        },
+        photo: {
+          select: {
+            userId: true
           }
         }
       },
@@ -49,7 +55,8 @@ export async function POST(request, { params }) {
           user: {
             select: {
               username: true,
-              profileImage: true
+              profileImage: true,
+              id: true
             }
           }
         }
@@ -68,5 +75,57 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Error creating comment:', error)
     return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 })
+  }
+}
+
+// DELETE /api/photos/[id]/comments - Delete a comment
+export async function DELETE(request, { params }) {
+  try {
+    const { commentId, userId } = await request.json()
+
+    if (!commentId || !userId) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Get the comment to check permissions
+    const comment = await prisma.comment.findUnique({
+      where: { id: parseInt(commentId) },
+      include: {
+        photo: {
+          select: {
+            userId: true
+          }
+        }
+      }
+    })
+
+    if (!comment) {
+      return NextResponse.json({ error: 'Comment not found' }, { status: 404 })
+    }
+
+    // Check if user is authorized to delete the comment
+    if (comment.userId !== parseInt(userId) && comment.photo.userId !== parseInt(userId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Use a transaction to ensure both operations succeed or fail together
+    await prisma.$transaction([
+      prisma.comment.delete({
+        where: { id: parseInt(commentId) }
+      }),
+      prisma.photo.update({
+        where: { id: parseInt(params.id) },
+        data: {
+          commentsCount: {
+            decrement: 1
+          }
+        }
+      })
+    ])
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting comment:', error)
+    return NextResponse.json({ error: 'Failed to delete comment' }, { status: 500 })
   }
 } 

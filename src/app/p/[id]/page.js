@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function PhotoPage({ params: pageParams }) {
+export default function PhotoPage({ params }) {
+  const pageParams = use(params)
   const router = useRouter()
   const [photo, setPhoto] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -124,6 +125,36 @@ export default function PhotoPage({ params: pageParams }) {
     }
   }
 
+  const handleDeleteComment = async (commentId) => {
+    if (!user) return
+
+    try {
+      const res = await fetch(`/api/photos/${pageParams.id}/comments`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          commentId,
+          userId: user.id
+        })
+      })
+
+      if (res.ok) {
+        setComments(prev => prev.filter(comment => comment.id !== commentId))
+        setPhoto(prev => ({
+          ...prev,
+          commentsCount: Math.max(0, (prev.commentsCount || 0) - 1)
+        }))
+      } else {
+        const data = await res.json()
+        console.error('Error:', data.error)
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error)
+    }
+  }
+
   // Loading state
   if (loading) {
     return (
@@ -214,14 +245,25 @@ export default function PhotoPage({ params: pageParams }) {
 
             {/* Comments */}
             {comments.map(comment => (
-              <div key={comment.id} className="flex space-x-3">
+              <div key={comment.id} className="flex items-center space-x-3 group relative hover:bg-zinc-800/50 p-2 rounded">
                 <Link 
                   href={`/profile/${comment.user.username}`}
                   className="text-white font-medium hover:underline shrink-0"
                 >
                   {comment.user.username}
                 </Link>
-                <p className="text-gray-300">{comment.content}</p>
+                <p className="text-gray-300 flex-grow">{comment.content}</p>
+                {(user?.id === comment.user.id || user?.id === photo.user.id) && (
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="text-gray-400 hover:text-red-500 transition-all duration-200 ml-2"
+                    title="Delete comment"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                )}
               </div>
             ))}
           </div>

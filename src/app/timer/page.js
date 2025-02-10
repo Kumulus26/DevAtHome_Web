@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function Timer() {
+function TimerContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedISO, setSelectedISO] = useState(null)
@@ -13,6 +13,15 @@ export default function Timer() {
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
   const [currentProcess, setCurrentProcess] = useState('developer')
+
+  const selectedFilm = searchParams.get('film')
+  const selectedDeveloper = searchParams.get('developer')
+
+  const processes = {
+    developer: { name: 'Developer', time: developmentTime ? developmentTime * 60 : 0 },
+    stopBath: { name: 'Stop Bath', time: 60 },
+    fixer: { name: 'Fixer', time: 300 }
+  }
 
   const beep = () => {
     const context = new (window.AudioContext || window.webkitAudioContext)();
@@ -29,15 +38,6 @@ export default function Timer() {
     oscillator.stop(context.currentTime + 0.1);
   };
 
-  const selectedFilm = searchParams.get('film')
-  const selectedDeveloper = searchParams.get('developer')
-
-  const processes = {
-    developer: { name: 'Developer', time: developmentTime ? developmentTime * 60 : 0 },
-    stopBath: { name: 'Stop Bath', time: 60 },
-    fixer: { name: 'Fixer', time: 300 }
-      }
-
   useEffect(() => {
     if (timeLeft > 0 && isTimerRunning) {
       const timer = setInterval(() => {
@@ -47,7 +47,7 @@ export default function Timer() {
               beep();
             } catch (error) {
               console.error('Beep failed:', error);
-    }
+            }
           }
           return prev - 1;
         });
@@ -80,7 +80,7 @@ export default function Timer() {
       if (!response.ok) {
         setError(true)
         throw new Error(data.error)
-  }
+      }
 
       setDevelopmentTime(data.time)
       setTimeLeft(data.time * 60)
@@ -230,5 +230,17 @@ export default function Timer() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function Timer() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-200 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    }>
+      <TimerContent />
+    </Suspense>
   )
 } 

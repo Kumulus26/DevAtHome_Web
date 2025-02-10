@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
-import { use } from 'react'
 import Link from 'next/link'
 
 export default function Profile({ params }) {
-  const resolvedParams = use(params)
+  const pageParams = use(params)
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [bio, setBio] = useState('')
@@ -26,13 +25,13 @@ export default function Profile({ params }) {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!resolvedParams?.username) {
+      if (!pageParams?.username) {
         setLoading(false)
         return
       }
 
       try {
-        const username = resolvedParams.username
+        const username = pageParams.username
         const response = await fetch(`/api/profile/${username}`)
         const data = await response.json()
 
@@ -71,7 +70,7 @@ export default function Profile({ params }) {
     }
 
     fetchProfile()
-  }, [resolvedParams?.username])
+  }, [pageParams?.username])
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0]
