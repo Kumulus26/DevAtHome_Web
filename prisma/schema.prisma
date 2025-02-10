@@ -160,6 +160,8 @@ model User {
   bio           String?   @db.Text
   profileImage  String?   @db.Text
   photos        Photo[]
+  likes         Like[]
+  comments      Comment[]
 }
 
 model Photo {
@@ -170,8 +172,31 @@ model Photo {
   createdAt DateTime @default(now())
   title     String?
   likes     Int      @default(0)
-  comments  Int      @default(0)
-} 
+  commentsCount Int  @default(0) @map("comments")
+  likedBy   Like[]
+  comments  Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  userId    Int
+  photoId   Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  photo     Photo    @relation(fields: [photoId], references: [id])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  photoId   Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  photo     Photo    @relation(fields: [photoId], references: [id])
+
+  @@unique([userId, photoId])
+}
 
 model rpx400hc110 {
   id          Int     @id @default(autoincrement())

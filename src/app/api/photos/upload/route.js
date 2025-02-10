@@ -89,7 +89,7 @@ export async function POST(request) {
             url: fileUrl,
             userId: user.id,
             likes: 0,
-            comments: 0
+            commentsCount: 0
           }
         })
 

@@ -218,36 +218,56 @@ export default function Profile({ params }) {
   )
 
   const PhotoGrid = ({ photos }) => {
-    if (!photos || photos.length === 0) {
+    if (!photos || !Array.isArray(photos) || photos.length === 0) {
       return (
-        <div className="text-center text-gray-400 py-8">
-          No photos yet
+        <div className="flex flex-col items-center justify-center py-20 px-4 bg-gray-800/30 rounded-2xl backdrop-blur-sm">
+          <div className="w-24 h-24 mb-6 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="text-white text-xl font-semibold mb-2 text-center">Pas de photos encore...</h3>
+          <p className="text-gray-400 text-center max-w-sm">
+            Commencez à partager vos moments avec le monde. Vos photos apparaîtront ici dans une galerie élégante.
+          </p>
         </div>
       )
     }
 
+    const validPhotos = photos.filter(photo => photo && photo.url && photo.id);
+
     return (
-      <div className="grid grid-cols-3 gap-1 mt-4">
-        {photos.map((photo) => (
-          <Link href={`/p/${photo.id}`} key={photo.id} className="relative aspect-square group">
-            <img
-              src={photo.url}
-              alt=""
-              className="object-cover w-full h-full"
-            />
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <div className="flex gap-6 text-white">
-                <div className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-6 h-6">
-                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                  </svg>
-                  <span>{photo.likes}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-6 h-6">
-                    <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 00-1.032-.211 50.89 50.89 0 00-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 002.433 3.984L7.28 21.53A.75.75 0 016 21v-4.03a48.527 48.527 0 01-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979z" />
-                  </svg>
-                  <span>{photo.comments}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto px-4">
+        {validPhotos.map((photo) => (
+          <Link
+            href={`/p/${photo.id}`}
+            key={photo.id}
+            className="block aspect-square w-full rounded-lg overflow-hidden bg-gray-800/50 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10" />
+            
+            <div className="w-full h-full">
+              <img
+                src={photo.url}
+                alt=""
+                className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+              />
+              
+              {/* Photo Stats Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 bg-gradient-to-t from-black/60 to-transparent">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span>{photo.likes || 0}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span>{photo.comments || 0}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -441,7 +461,7 @@ export default function Profile({ params }) {
             ) : (
               <div className="relative group">
                 <p className="text-gray-300 text-lg">
-                  {user.bio || 'No bio yet'}
+                  {user.bio || ''}
                 </p>
                 {isOwnProfile && (
                   <button
@@ -458,42 +478,29 @@ export default function Profile({ params }) {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center space-x-6 text-lg mb-8">
+          <div className="flex justify-center space-x-16 mt-8">
             <div className="text-center">
-              <span className="block text-white font-bold">5</span>
-              <span className="text-gray-400">Posts</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <div className="text-2xl font-bold text-white">{user?.photos?.length || 0}</div>
             </div>
-            <div className="h-10 w-px bg-gray-700"></div>
             <div className="text-center">
-              <span className="block text-white font-bold">2.3K</span>
-              <span className="text-gray-400">Followers</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <div className="text-2xl font-bold text-white">{user?.photos?.reduce((sum, photo) => sum + (photo.likes || 0), 0) || 0}</div>
             </div>
-            <div className="h-10 w-px bg-gray-700"></div>
             <div className="text-center">
-              <span className="block text-white font-bold">225</span>
-              <span className="text-gray-400">Following</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              <div className="text-2xl font-bold text-white">{user?.photos?.reduce((sum, photo) => sum + (photo.commentsCount || 0), 0) || 0}</div>
+              
             </div>
           </div>
 
-          {/* Navigation */}
-          <div className="flex space-x-8 border-b border-gray-800 w-full justify-center mb-8">
-            {['PHOTOS', 'ALBUMS', 'LIKES'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab.toLowerCase())}
-                className={`pb-4 px-2 text-sm font-medium transition-colors relative ${
-                  activeTab === tab.toLowerCase()
-                    ? 'text-blue-500'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {tab}
-                {activeTab === tab.toLowerCase() && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
-                )}
-              </button>
-            ))}
-          </div>
+          
 
           {/* Add Photo Button - Only show on Photos tab and if it's user's own profile */}
           {activeTab === 'photos' && isOwnProfile && (
@@ -518,7 +525,7 @@ export default function Profile({ params }) {
           )}
 
           {/* Photos Grid */}
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-1 w-full">
+          <div className="w-full">
             {activeTab === 'photos' ? (
               <PhotoGrid photos={user.photos || []} />
             ) : activeTab === 'albums' ? (

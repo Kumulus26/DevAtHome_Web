@@ -80,9 +80,6 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
         <Link href="/tableau" className="text-white hover:text-gray-600 mix-blend-difference">
           Tableau
         </Link>
-        <Link href="/profile" className="text-white hover:text-gray-600 mix-blend-difference">
-          Actualité
-        </Link>
         <Link href="/contact" className="text-white hover:text-gray-600 mix-blend-difference">
           À propos
         </Link>
