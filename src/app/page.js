@@ -74,29 +74,29 @@ export default function Home() {
               {/* Left Column */}
               <div className="space-y-8">
                 <h1 className="text-6xl font-bold leading-tight text-black">
-                  Vos pellicules <br />
-                  <span className="text-black">Noir </span> 
+                  Your 
+                  <span className="text-black"> Black </span> 
                   <span className="relative z-10">& </span>
                   <span className="text-white" style={{ WebkitTextStroke: "1.5px black" }}>
-                      Blanc </span>                
-                    <span className="text-black">méritent le meilleur</span>
+                      White </span>                
+                    <span className="text-black">films deserve the best 🎞️</span>
                 </h1>
                 <p className="text-xl text-gray-800">
-                  Le développement à la maison n'aura plus de secret pour vous.
+                  The development at home will no longer be a secret for you.
                 </p>
                 
                 {/* Stats Section */}
                 <div className="flex space-x-8 mt-16">
                   <div className="bg-black text-white p-8 rounded-lg backdrop-blur-sm bg-opacity-90">
-                    <div className="text-4xl font-bold">+96 recettes</div>
+                    <div className="text-4xl font-bold">+26 recipes</div>
                     <div className="mt-2 text-sm">
-                      VOUS TROUVEREZ FORCEMENT LA VOTRE.
+                      You will find the one that fits your style.
                     </div>
                   </div>
                   
                   <div className="bg-white p-8 rounded-lg shadow-lg backdrop-blur-sm bg-opacity-90">
                     <div className="text-4xl font-bold text-gray-900">100%</div>
-                    <div className="mt-2 text-gray-800">Une communauté active</div>
+                    <div className="mt-2 text-gray-800">An active community</div>
                     <div className="flex items-center mt-4 space-x-2">
                       <div className="flex -space-x-2">
                         <div className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"></div>

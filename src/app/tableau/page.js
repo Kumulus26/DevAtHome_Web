@@ -21,31 +21,31 @@ export default function Tableau() {
       id: 'hp5-400',
       name: "HP5+ 400",
       image: "/images/hp5400.png",
-      description: "Film noir et blanc polyvalent"
+      description: "Versatile black and white film"
     },
     {
       id: 'tmax-400',
       name: "T-MAX 400",
       image: "/images/tmax400.png",
-      description: "Grain fin, contraste élevé"
+      description: "Fine grain, high contrast"
     },
     {
       id: 'fomapan-400',
       name: "FOMAPAN 400",
       image: "/images/fomapan400.png",
-      description: "Film classique abordable"
+      description: "Affordable classic film"
     },
     {
       id: 'rpx-400',
       name: "RPX 400",
       image: "/images/rpx400.png",
-      description: "Polyvalente, contrastée, grain fin"
+      description: "Versatile, high contrast, fine grain"
     },
     {
       id: 'tri-x-400',
       name: "Tri-X 400",
       image: "/images/trix400.png",
-      description: "Le classique intemporel"
+      description: "The timeless classic"
     }
   ]
 
@@ -54,31 +54,31 @@ export default function Tableau() {
       id: 'ilfosol3',
       name: "Ilfosol 3",
       image: "/images/ilfosol3.png",
-      description: "Pour la basse sensibilité"
+      description: "For low sensitivity"
     },
     {
       id: 'rodinal',
       name: "Rodinal",
       image: "/images/rodinal.png",
-      description: "Le plus ancien révélateur"
+      description: "The oldest developer"
     },
     {
       id: 'tmaxdev',
       name: "T-MAX Dev",
       image: "/images/tmaxdev.png",
-      description: "Pour la haute sensibilité"
+      description: "For high sensitivity"
     },
     {
       id: 'hc110',
       name: "HC-110",
       image: "/images/hc110.png",
-      description: "Longue conservation"
+      description: "Long-term storage"
     },
     {
       id: 'ilfoteclc29',
       name: "Ilfotec LC-29",
       image: "/images/ilfoteclc29.png",
-      description: "Granulation et définition excellentes"
+      description: "Excellent grain and definition"
     }
   ]
 
@@ -186,8 +186,8 @@ export default function Tableau() {
                 }`}
               >
                 <h2 className="text-4xl text-center relative z-10">
-                  <span className="text-black">Qu'est ce qu'on dével</span>
-                  <span className="text-white">oppe aujourd'hui ?</span>
+                  <span className="text-black">What are you deve</span>
+                  <span className="text-white">loping today ?</span>
                 </h2>
               </div>
 
@@ -205,8 +205,8 @@ export default function Tableau() {
                 <>
                   <div className="transform transition-all duration-1000 opacity-0 animate-fade-in">
                     <h2 className="text-3xl text-center relative z-10">
-                      <span className="text-black">Très bon choix ! </span>
-                      <span className="text-white">Et avec quel révélateur ?</span>
+                      <span className="text-black">Very good choice ! </span>
+                      <span className="text-white">And with which developer ?</span>
                     </h2>
                   </div>
                   <div className="w-full px-4 transform transition-all duration-1000 opacity-0 animate-fade-in">

@@ -322,7 +322,7 @@ export default function Profile({ params }) {
         <div className="relative">
           <input
             type="text"
-            placeholder="Recherche un utilisateur..."
+            placeholder="Search a user..."
             value={searchQuery}
             onChange={handleSearch}
             className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -500,8 +500,6 @@ export default function Profile({ params }) {
           </div>
 
           
-
-          {/* Add Photo Button - Only show on Photos tab and if it's user's own profile */}
           {activeTab === 'photos' && isOwnProfile && (
             <div className="w-full flex justify-end mb-6">
               <input
@@ -513,12 +511,21 @@ export default function Profile({ params }) {
               />
               <button
                 onClick={() => photoInputRef.current?.click()}
-                className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="flex items-center bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                <span>Ajouter une photo</span>
               </button>
             </div>
           )}
