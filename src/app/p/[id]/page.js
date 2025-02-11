@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function PhotoPage({ params }) {
   const pageParams = use(params)
@@ -155,6 +156,13 @@ export default function PhotoPage({ params }) {
     }
   }
 
+  const handleOutsideClick = (e) => {
+    // Check if the click is outside both the photo and comments section
+    if (e.target.classList.contains('modal-backdrop')) {
+      router.back()
+    }
+  }
+
   // Loading state
   if (loading) {
     return (
@@ -179,105 +187,110 @@ export default function PhotoPage({ params }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      {/* Close button */}
-      <button 
-        onClick={() => router.back()}
-        className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+    <div 
+      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 modal-backdrop"
+      onClick={handleOutsideClick}
+    >
+      <div 
+        className="flex max-w-6xl w-full h-[90vh] bg-black rounded-lg overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* Photo container */}
-      <div className="bg-zinc-900 rounded-xl overflow-hidden max-w-5xl w-full mx-auto flex flex-col md:flex-row">
-        {/* Photo */}
-        <div className="w-full md:w-2/3 relative bg-black flex items-center justify-center">
-          <img
+        {/* Left side - Photo */}
+        <div className="flex-1 relative bg-black flex items-center justify-center">
+          <Image
             src={photo.url}
             alt=""
-            className="max-h-[80vh] w-full object-contain"
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>
 
-        {/* User info, actions, and comments */}
-        <div className="w-full md:w-1/3 p-4 flex flex-col h-[80vh]">
-          {/* User header */}
-          <div className="flex items-center space-x-3 border-b border-zinc-800 pb-4">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden">
-              {photo.user?.profileImage ? (
-                <img 
-                  src={photo.user.profileImage} 
-                  alt={photo.user.username}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-zinc-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
+        {/* Right side - Comments */}
+        <div className="w-96 bg-black flex flex-col">
+          {/* User info header */}
+          <div className="p-4 border-b border-gray-800">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden">
+                {photo.user.profileImage ? (
+                  <Image
+                    src={photo.user.profileImage}
+                    alt={photo.user.username}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-700">
+                    <span className="text-gray-300 text-sm">
+                      {photo.user.username[0].toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <Link
+                href={`/profile/${photo.user.username}`}
+                className="font-medium text-white hover:underline"
+              >
+                {photo.user.username}
+              </Link>
             </div>
-            <Link 
-              href={`/profile/${photo.user?.username}`}
-              className="text-white font-medium hover:underline"
-            >
-              {photo.user?.username}
-            </Link>
           </div>
 
           {/* Comments section */}
-          <div className="flex-1 overflow-y-auto py-4 space-y-4">
-            {/* Photo caption */}
-            {photo.title && (
-              <div className="flex space-x-3">
-                <Link 
-                  href={`/profile/${photo.user?.username}`}
-                  className="text-white font-medium hover:underline shrink-0"
-                >
-                  {photo.user?.username}
-                </Link>
-                <p className="text-gray-300">{photo.title}</p>
-              </div>
-            )}
-
-            {/* Comments */}
-            {comments.map(comment => (
-              <div key={comment.id} className="flex items-center space-x-3 group relative hover:bg-zinc-800/50 p-2 rounded">
-                <Link 
-                  href={`/profile/${comment.user.username}`}
-                  className="text-white font-medium hover:underline shrink-0"
-                >
-                  {comment.user.username}
-                </Link>
-                <p className="text-gray-300 flex-grow">{comment.content}</p>
-                {(user?.id === comment.user.id || user?.id === photo.user.id) && (
-                  <button
-                    onClick={() => handleDeleteComment(comment.id)}
-                    className="text-gray-400 hover:text-red-500 transition-all duration-200 ml-2"
-                    title="Delete comment"
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex space-x-3">
+                <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden flex-shrink-0">
+                  {comment.user.profileImage ? (
+                    <Image
+                      src={comment.user.profileImage}
+                      alt={comment.user.username}
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-700">
+                      <span className="text-gray-300 text-sm">
+                        {comment.user.username[0].toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <Link
+                    href={`/profile/${comment.user.username}`}
+                    className="font-medium text-white hover:underline"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                )}
+                    {comment.user.username}
+                  </Link>{' '}
+                  <span className="text-gray-300">{comment.content}</span>
+                  {user && (comment.userId === user.id || photo.userId === user.id) && (
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="ml-2 text-gray-500 hover:text-red-500"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Actions */}
-          <div className="border-t border-zinc-800 pt-4">
+          {/* Like and comment actions */}
+          <div className="border-t border-gray-800 p-4">
             <div className="flex items-center space-x-4 mb-4">
               <button 
                 onClick={handleLike}
-                className="flex items-center space-x-2 text-white hover:text-red-500 transition-colors"
+                className="text-white hover:text-gray-300"
               >
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-7 w-7 ${isLiked ? 'text-red-500 fill-current' : ''}`} 
+                  className={`h-6 w-6 ${photo.isLiked ? 'text-red-500 fill-current' : ''}`}
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
@@ -289,28 +302,33 @@ export default function PhotoPage({ params }) {
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
                   />
                 </svg>
-                <span className="text-sm font-medium">{photo.likes || 0} likes</span>
               </button>
+              <span className="text-white">{photo.likes} likes</span>
             </div>
 
-            {/* Comment form */}
-            <form onSubmit={handleComment} className="flex items-center space-x-2">
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none"
-                disabled={isSubmitting}
-              />
-              <button
-                type="submit"
-                disabled={!newComment.trim() || isSubmitting}
-                className="text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:text-blue-400 transition-colors"
-              >
-                Post
-              </button>
-            </form>
+            {user && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleComment(e)
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleComment}
+                  disabled={!newComment.trim()}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                >
+                  Post
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

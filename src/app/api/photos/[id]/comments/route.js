@@ -4,21 +4,17 @@ import prisma from '@/lib/prisma'
 // GET /api/photos/[id]/comments - Get comments for a photo
 export async function GET(request, { params }) {
   try {
+    const { id } = params
+    
     const comments = await prisma.comment.findMany({
       where: {
-        photoId: parseInt(params.id)
+        photoId: parseInt(id)
       },
       include: {
         user: {
           select: {
             username: true,
-            profileImage: true,
-            id: true
-          }
-        },
-        photo: {
-          select: {
-            userId: true
+            profileImage: true
           }
         }
       },
@@ -30,51 +26,56 @@ export async function GET(request, { params }) {
     return NextResponse.json(comments)
   } catch (error) {
     console.error('Error fetching comments:', error)
-    return NextResponse.json({ error: 'Failed to fetch comments' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Error fetching comments' },
+      { status: 500 }
+    )
   }
 }
 
 // POST /api/photos/[id]/comments - Create a new comment
 export async function POST(request, { params }) {
   try {
+    const { id } = params
     const { content, userId } = await request.json()
 
-    if (!content || !userId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-    }
-
-    // Use a transaction to ensure both operations succeed or fail together
-    const [comment] = await prisma.$transaction([
-      prisma.comment.create({
-        data: {
-          content,
-          userId: parseInt(userId),
-          photoId: parseInt(params.id)
+    const comment = await prisma.comment.create({
+      data: {
+        content,
+        photo: {
+          connect: { id: parseInt(id) }
         },
-        include: {
-          user: {
-            select: {
-              username: true,
-              profileImage: true,
-              id: true
-            }
+        user: {
+          connect: { id: parseInt(userId) }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            profileImage: true
           }
         }
-      }),
-      prisma.photo.update({
-        where: { id: parseInt(params.id) },
-        data: {
-          commentsCount: {
-            increment: 1
-          }
+      }
+    })
+
+    // Update the comments count on the photo
+    await prisma.photo.update({
+      where: { id: parseInt(id) },
+      data: {
+        commentsCount: {
+          increment: 1
         }
-      })
-    ])
+      }
+    })
 
     return NextResponse.json(comment)
   } catch (error) {
     console.error('Error creating comment:', error)
-    return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Error creating comment' },
+      { status: 500 }
+    )
   }
 }
 

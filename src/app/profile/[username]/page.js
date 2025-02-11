@@ -22,6 +22,7 @@ export default function Profile({ params }) {
   const [isSearching, setIsSearching] = useState(false)
   const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const photoInputRef = useRef(null)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -203,6 +204,32 @@ export default function Profile({ params }) {
     }
   }
 
+  const handleDeletePhoto = async (photoId) => {
+    try {
+      const response = await fetch(`/api/photos/delete/${photoId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete photo')
+      }
+
+      const data = await response.json()
+      
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      setUser(prev => ({
+        ...prev,
+        photos: prev.photos.filter(photo => photo.id !== photoId)
+      }))
+    } catch (err) {
+      console.error('Error deleting photo:', err)
+      alert('Failed to delete photo. Please try again.')
+    }
+  }
+
   const WhiteLogo = () => (
     <Link href="/" className="flex items-center space-x-4">
       <div className="w-12 h-12">
@@ -219,14 +246,14 @@ export default function Profile({ params }) {
   const PhotoGrid = ({ photos }) => {
     if (!photos || !Array.isArray(photos) || photos.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 px-4 bg-gray-800/30 rounded-2xl backdrop-blur-sm">
-          <div className="w-24 h-24 mb-6 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-12 sm:py-20 px-4 bg-gray-800/30 rounded-2xl backdrop-blur-sm">
+          <div className="w-16 sm:w-24 h-16 sm:h-24 mb-6 text-gray-400">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="text-white text-xl font-semibold mb-2 text-center">Pas de photos encore...</h3>
-          <p className="text-gray-400 text-center max-w-sm">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-center text-white">Pas de photos encore...</h3>
+          <p className="text-sm sm:text-base text-gray-400 text-center max-w-sm">
             Commencez à partager vos moments avec le monde. Vos photos apparaîtront ici dans une galerie élégante.
           </p>
         </div>
@@ -236,41 +263,44 @@ export default function Profile({ params }) {
     const validPhotos = photos.filter(photo => photo && photo.url && photo.id);
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto px-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2">
         {validPhotos.map((photo) => (
-          <Link
-            href={`/p/${photo.id}`}
-            key={photo.id}
-            className="block aspect-square w-full rounded-lg overflow-hidden bg-gray-800/50 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10" />
-            
-            <div className="w-full h-full">
-              <img
-                src={photo.url}
-                alt=""
-                className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
-              />
-              
-              {/* Photo Stats Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 bg-gradient-to-t from-black/60 to-transparent">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span>{photo.likes || 0}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <span>{photo.comments || 0}</span>
-                  </div>
-                </div>
+          <div key={photo.id} className="relative aspect-square group">
+            <Image
+              src={photo.url}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 300px"
+              className="object-cover"
+              onClick={() => !isEditMode && router.push(`/p/${photo.id}`)}
+            />
+            {isEditMode && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeletePhoto(photo.id)
+                  }}
+                  className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
               </div>
-            </div>
-          </Link>
+            )}
+          </div>
         ))}
       </div>
     )
@@ -318,14 +348,14 @@ export default function Profile({ params }) {
       <Navbar />
       
       {/* Search Section */}
-      <div className="max-w-4xl mx-auto px-4 pt-8">
+      <div className="max-w-4xl mx-auto px-4 pt-4 sm:pt-8">
         <div className="relative">
           <input
             type="text"
             placeholder="Search a user..."
             value={searchQuery}
             onChange={handleSearch}
-            className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           />
           {searchQuery.length >= 2 && (
             <div className="absolute w-full mt-2 bg-gray-800 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
@@ -373,12 +403,12 @@ export default function Profile({ params }) {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto pt-20 px-4">
+      <div className="max-w-4xl mx-auto pt-8 sm:pt-20 px-4">
         {/* Profile Header */}
-        <div className="flex flex-col items-center mb-12">
+        <div className="flex flex-col items-center mb-8 sm:mb-12">
           {/* Profile Image with Edit Overlay */}
-          <div className="relative group mb-6">
-            <div className="w-40 h-40 rounded-full overflow-hidden ring-4 ring-white/10 bg-gray-800">
+          <div className="relative group mb-4 sm:mb-6">
+            <div className="w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden ring-4 ring-white/10 bg-gray-800">
               <div className="w-full h-full relative">
                 {user?.profileImage ? (
                   <img 
@@ -423,13 +453,13 @@ export default function Profile({ params }) {
           </div>
 
           {/* Username and Location */}
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             {user.username}
           </h1>
           
 
           {/* Bio */}
-          <div className="max-w-lg w-full text-center mb-6">
+          <div className="max-w-lg w-full text-center mb-4 sm:mb-6">
             {isEditing ? (
               <div className="space-y-4">
                 <textarea
@@ -477,31 +507,33 @@ export default function Profile({ params }) {
           </div>
 
           {/* Stats */}
-          <div className="flex justify-center space-x-16 mt-8">
+          <div className="flex flex-wrap justify-center gap-8 sm:gap-16 mt-8">
             <div className="text-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div className="text-2xl font-bold text-white">{user?.photos?.length || 0}</div>
+              <div className="text-sm text-gray-400">Photos</div>
             </div>
             <div className="text-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               <div className="text-2xl font-bold text-white">{user?.photos?.reduce((sum, photo) => sum + (photo.likes || 0), 0) || 0}</div>
+              <div className="text-sm text-gray-400">Likes</div>
             </div>
             <div className="text-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
               <div className="text-2xl font-bold text-white">{user?.photos?.reduce((sum, photo) => sum + (photo.commentsCount || 0), 0) || 0}</div>
-              
+              <div className="text-sm text-gray-400">Comments</div>
             </div>
           </div>
 
           
           {activeTab === 'photos' && isOwnProfile && (
-            <div className="w-full flex justify-end mb-6">
+            <div className="w-full flex justify-end mb-4 sm:mb-6 space-x-2">
               <input
                 type="file"
                 ref={photoInputRef}
@@ -510,12 +542,30 @@ export default function Profile({ params }) {
                 onChange={handlePhotoUpload}
               />
               <button
-                onClick={() => photoInputRef.current?.click()}
-                className="flex items-center bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`flex items-center ${isEditMode ? 'bg-red-500' : 'bg-gray-800'} text-white px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 transition-colors`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-7 w-7"
+                  className="h-5 w-5 sm:h-7 sm:w-7"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                className="flex items-center bg-black text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 sm:h-7 sm:w-7"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -532,17 +582,7 @@ export default function Profile({ params }) {
 
           {/* Photos Grid */}
           <div className="w-full">
-            {activeTab === 'photos' ? (
-              <PhotoGrid photos={user.photos || []} />
-            ) : activeTab === 'albums' ? (
-              <div className="col-span-full text-center py-8 text-gray-400">
-                Albums feature coming soon
-              </div>
-            ) : (
-              <div className="col-span-full text-center py-8 text-gray-400">
-                Likes feature coming soon
-              </div>
-            )}
+            <PhotoGrid photos={user.photos || []} />
           </div>
         </div>
       </div>

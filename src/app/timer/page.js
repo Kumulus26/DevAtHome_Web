@@ -19,8 +19,8 @@ function TimerContent() {
 
   const processes = {
     developer: { name: 'Developer', time: developmentTime ? developmentTime * 60 : 0 },
-    stopBath: { name: 'Stop Bath', time: 60 },
-    fixer: { name: 'Fixer', time: 300 }
+    stopBath: { name: 'Stop Bath', time: 120 },
+    fixer: { name: 'Fixer', time: 420 }
   }
 
   const beep = () => {
@@ -42,7 +42,7 @@ function TimerContent() {
     if (timeLeft > 0 && isTimerRunning) {
       const timer = setInterval(() => {
         setTimeLeft(prev => {
-          if (currentProcess === 'developer' && prev % 30 === 0 && prev !== processes.developer.time) {
+          if (currentProcess === 'developer' && prev % 60 === 0 && prev !== processes.developer.time) {
             try {
               beep();
             } catch (error) {
@@ -135,25 +135,25 @@ function TimerContent() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-200 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-zinc-200 flex flex-col items-center justify-start sm:justify-center px-4 py-8 sm:p-6">
       <Link href="/" className="absolute top-6 left-6">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="black" className="w-8 h-8">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="black" className="w-6 h-6 sm:w-8 sm:h-8">
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
       </Link>
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg lg:max-w-6xl mt-16 sm:mt-0">
         {!selectedISO ? (
-          <div className="text-black text-center">
-            <h2 className="text-3xl font-light mb-12">
+          <div className="text-black text-center max-w-lg mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-light mb-8 sm:mb-12">
               At what ISO did you shoot your film?
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[400, 800, 1600, 3200].map((iso) => (
                 <button
                   key={iso}
                   onClick={() => handleISOSelect(iso)}
-                  className="bg-white hover:bg-gray-50 p-6 rounded-2xl
-                           text-2xl font-light transition-all duration-300
+                  className="bg-white hover:bg-gray-50 py-4 sm:p-6 rounded-2xl
+                           text-xl sm:text-2xl font-light transition-all duration-300
                            hover:scale-105 shadow-lg"
                 >
                   {iso}
@@ -163,12 +163,12 @@ function TimerContent() {
           </div>
         ) : (
           <div className="w-full">
-            <div className="flex justify-center gap-4 mb-6">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
               {Object.entries(processes).map(([key, { name }]) => (
                 <button
                   key={key}
                   onClick={() => handleProcessSelect(key)}
-                  className={`px-8 py-3 rounded-full text-lg transition-all duration-300
+                  className={`px-4 sm:px-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition-all duration-300
                     ${currentProcess === key 
                       ? 'bg-[#0891b2] text-white' 
                       : 'bg-gray-400 text-white'}`}
@@ -178,53 +178,81 @@ function TimerContent() {
               ))}
             </div>
 
-            <div className="bg-black rounded-[2rem] p-8 flex items-center justify-between shadow-xl">
-              <div className="flex-1">
-                <div className="text-gray-400 text-xl mb-2">Timer</div>
-                <div className="text-white text-7xl font-light tracking-wider mb-4">
-                  {formatTime(timeLeft)}
+            <div className="lg:flex lg:items-start lg:gap-12 lg:justify-center">
+              <div className="max-w-lg w-full">
+                <div className="bg-black rounded-[2rem] p-4 sm:p-8 flex items-center justify-between shadow-xl">
+                  <div className="flex-1">
+                    <div className="text-gray-400 text-lg sm:text-xl mb-1 sm:mb-2">Timer</div>
+                    <div className="text-white text-5xl sm:text-7xl font-light tracking-wider mb-2 sm:mb-4">
+                      {formatTime(timeLeft)}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setTimeLeft(processes[currentProcess].time)
+                        setIsTimerRunning(false)
+                      }}
+                      className="px-6 sm:px-8 py-2 bg-zinc-800 text-white text-sm sm:text-base rounded-full
+                               hover:bg-zinc-700 transition-colors"
+                    >
+                      Stop
+                    </button>
+                  </div>
+
+                  <div className="relative ml-4">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-[#0f2936] relative overflow-hidden">
+                      <svg 
+                        viewBox="0 0 100 100" 
+                        className="absolute inset-0 w-full h-full rotate-[-90deg]"
+                      >
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          stroke="#0891b2"
+                          strokeWidth="6"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 40}`}
+                          strokeDashoffset={`${2 * Math.PI * 40 * (1 - timeLeft / processes[currentProcess].time)}`}
+                          className="transition-all duration-1000"
+                        />
+                      </svg>
+                      <button
+                        onClick={handlePlayPause}
+                        className="absolute inset-0 flex items-center justify-center"
+                      >
+                        <span className="text-white text-3xl sm:text-4xl">
+                          {isTimerRunning ? '❚❚' : '▶'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setTimeLeft(processes[currentProcess].time)
-                    setIsTimerRunning(false)
-                  }}
-                  className="px-8 py-2 bg-zinc-800 text-white rounded-full
-                           hover:bg-zinc-700 transition-colors"
-                >
-                  Stop
-                </button>
+
+                <div className="mt-4 flex justify-center">
+                  <div className="w-24 sm:w-32 h-1 bg-black rounded-full"></div>
+                </div>
               </div>
 
-              <div className="relative">
-                <div className="w-32 h-32 rounded-2xl bg-[#0f2936] relative overflow-hidden">
-                  <svg className="absolute inset-0 w-full h-full rotate-[-90deg]">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="#0891b2"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 56}`}
-                      strokeDashoffset={`${2 * Math.PI * 56 * (1 - calculateProgress() / 100)}`}
-                      className="transition-all duration-1000"
-                    />
-                  </svg>
-                  <button
-                    onClick={handlePlayPause}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    <span className="text-white text-4xl">
-                      {isTimerRunning ? '❚❚' : '▶'}
-                    </span>
-                  </button>
+              {/* Instructions Section */}
+              <div className="mt-8 lg:mt-0 lg:w-96">
+                <div className="bg-black rounded-[2rem] p-6 sm:p-8 shadow-xl">
+                  <h3 className="text-white text-xl font-medium mb-6">Instructions</h3>
+                  <ol className="space-y-6 text-gray-300">
+                    <li className="flex gap-4">
+                      <span className="flex-shrink-0 w-7 h-7 bg-[#0891b2] rounded-full flex items-center justify-center text-white text-sm">1</span>
+                      <p className="text-lg">Click on the timer once you start pouring the liquid.</p>
+                    </li>
+                    <li className="flex gap-4">
+                      <span className="flex-shrink-0 w-7 h-7 bg-[#0891b2] rounded-full flex items-center justify-center text-white text-sm">2</span>
+                      <p className="text-lg">Each time you hear a beep, invert your tank 4 times. Don't forget to tap your tank against the table once to release air bubbles.</p>
+                    </li>
+                    <li className="flex gap-4">
+                      <span className="flex-shrink-0 w-7 h-7 bg-[#0891b2] rounded-full flex items-center justify-center text-white text-sm">3</span>
+                      <p className="text-lg">15 seconds before the timer ends, start emptying your tank.</p>
+                    </li>
+                  </ol>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              <div className="w-32 h-1 bg-black rounded-full"></div>
             </div>
           </div>
         )}

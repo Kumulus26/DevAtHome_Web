@@ -1,97 +1,73 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-export async function POST(request, context) {
+export async function POST(request, { params }) {
   try {
-    const params = await context.params
-    const photoId = parseInt(params.id)
-    
-    // Get the user from the request body
+    const { id } = params
     const { userId } = await request.json()
-    
-    if (!userId) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized - User ID required' }), 
-        { 
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      )
-    }
 
     // Check if the user has already liked the photo
     const existingLike = await prisma.like.findUnique({
       where: {
         userId_photoId: {
-          userId: userId,
-          photoId: photoId
+          userId: parseInt(userId),
+          photoId: parseInt(id)
         }
       }
     })
 
     if (existingLike) {
-      // User has already liked the photo, so unlike it
-      await prisma.$transaction([
-        prisma.like.delete({
-          where: {
-            userId_photoId: {
-              userId: userId,
-              photoId: photoId
-            }
+      // Unlike the photo
+      await prisma.like.delete({
+        where: {
+          userId_photoId: {
+            userId: parseInt(userId),
+            photoId: parseInt(id)
           }
-        }),
-        prisma.photo.update({
-          where: { id: photoId },
-          data: {
-            likes: {
-              decrement: 1
-            }
-          }
-        })
-      ])
-
-      return new NextResponse(
-        JSON.stringify({ success: true, liked: false }),
-        { 
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
         }
-      )
+      })
+
+      // Decrement the likes count
+      await prisma.photo.update({
+        where: { id: parseInt(id) },
+        data: {
+          likes: {
+            decrement: 1
+          }
+        }
+      })
+
+      return NextResponse.json({ liked: false })
     } else {
-      // User hasn't liked the photo yet, so like it
-      await prisma.$transaction([
-        prisma.like.create({
-          data: {
-            userId: userId,
-            photoId: photoId
+      // Like the photo
+      await prisma.like.create({
+        data: {
+          user: {
+            connect: { id: parseInt(userId) }
+          },
+          photo: {
+            connect: { id: parseInt(id) }
           }
-        }),
-        prisma.photo.update({
-          where: { id: photoId },
-          data: {
-            likes: {
-              increment: 1
-            }
-          }
-        })
-      ])
-
-      return new NextResponse(
-        JSON.stringify({ success: true, liked: true }),
-        { 
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
         }
-      )
+      })
+
+      // Increment the likes count
+      await prisma.photo.update({
+        where: { id: parseInt(id) },
+        data: {
+          likes: {
+            increment: 1
+          }
+        }
+      })
+
+      return NextResponse.json({ liked: true })
     }
   } catch (error) {
     console.error('Error handling like:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal server error' }),
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
+    return NextResponse.json(
+      { error: 'Error handling like' },
+      { status: 500 }
     )
   }
 } 
