@@ -19,7 +19,7 @@ export default function About() {
       <Navbar />
       
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-6 pt-32 pb-20">
+      <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           {/* Image Column */}
           <div className="relative">

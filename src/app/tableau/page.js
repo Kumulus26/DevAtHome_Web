@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Login from '../login/page'
 import SignUp from '../signup/page'
+import Background from '@/components/Background'
 
 export default function Tableau() {
   const router = useRouter()
@@ -15,6 +16,7 @@ export default function Tableau() {
   const [showLogin, setShowLogin] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(true)
 
   const films = [
     {
@@ -89,6 +91,11 @@ export default function Tableau() {
     return () => clearTimeout(timer)
   }, [])
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    setIsDarkMode(savedTheme === 'dark' || savedTheme === null)
+  }, [])
+
   const handleLoginClick = () => {
     setShowSignUp(false)
     setShowLogin(true)
@@ -119,6 +126,12 @@ export default function Tableau() {
     setTimeout(() => {
       router.push(`/timer?film=${encodeURIComponent(selectedFilmObj.name)}&developer=${encodeURIComponent(selectedDeveloperObj.name)}`)
     }, 2000)
+  }
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode
+    setIsDarkMode(newTheme)
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light')
   }
 
   const renderImageGrid = (items, selectedId, onSelect) => (
@@ -155,26 +168,16 @@ export default function Tableau() {
     <>
       <div className={`min-h-screen relative overflow-hidden ${
         showLogin || showSignUp || showLoader ? 'blur-sm transition-all duration-200' : ''
-      }`}>
-        {/* Diagonal split background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-white"></div>
-          <div 
-            className="absolute bg-black" 
-            style={{
-              top: '0',
-              right: '0',
-              bottom: '0',
-              left: '55%',
-              transform: 'skew(-12deg)',
-              transformOrigin: 'top'
-            }}
-          ></div>
-        </div>
+      } ${isDarkMode ? 'text-white' : 'text-black'}`}>
+        <Background isDarkMode={isDarkMode} />
 
         {/* Content */}
         <div className="relative">
-          <Navbar onLoginClick={handleLoginClick} />
+          <Navbar 
+            onLoginClick={handleLoginClick}
+            isDarkMode={isDarkMode}
+            onThemeToggle={toggleTheme}
+          />
 
           {/* Main Content */}
           <main className="container mx-auto px-6 py-12">
@@ -186,8 +189,9 @@ export default function Tableau() {
                 }`}
               >
                 <h2 className="text-4xl text-center relative z-10">
-                  <span className="text-black">What are you deve</span>
-                  <span className="text-white">loping today ?</span>
+                  <span className={isDarkMode ? 'text-white' : 'text-black'}>
+                    What are you developing today ?
+                  </span>
                 </h2>
               </div>
 
@@ -205,8 +209,9 @@ export default function Tableau() {
                 <>
                   <div className="transform transition-all duration-1000 opacity-0 animate-fade-in">
                     <h2 className="text-3xl text-center relative z-10">
-                      <span className="text-black">Very good choice ! </span>
-                      <span className="text-white">And with which developer ?</span>
+                      <span className={isDarkMode ? 'text-white' : 'text-black'}>
+                        Very good choice ! And with which developer ?
+                      </span>
                     </h2>
                   </div>
                   <div className="w-full px-4 transform transition-all duration-1000 opacity-0 animate-fade-in">
