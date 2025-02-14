@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Login({ isModal = false, onClose, onSignUpClick }) {
   const router = useRouter()
@@ -13,6 +13,34 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Add function to check token expiration
+  const checkTokenExpiration = () => {
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      const { token } = JSON.parse(userData)
+      if (token) {
+        try {
+          const decodedToken = JSON.parse(atob(token.split('.')[1]))
+          if (decodedToken.exp * 1000 < Date.now()) {
+            // Token has expired
+            localStorage.removeItem('user')
+            window.location.reload()
+          }
+        } catch (error) {
+          console.error('Error checking token:', error)
+          localStorage.removeItem('user')
+        }
+      }
+    }
+  }
+
+  // Check token expiration on component mount and periodically
+  useEffect(() => {
+    checkTokenExpiration()
+    const interval = setInterval(checkTokenExpiration, 60000) // Check every minute
+    return () => clearInterval(interval)
+  }, [])
 
   const handleChange = (e) => {
     setFormData({
@@ -35,13 +63,14 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
         body: JSON.stringify(formData),
       })
 
-      const userData = await response.json()
+      const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(userData.error || 'Login failed')
+        throw new Error(data.error || 'Login failed')
       }
 
-      localStorage.setItem('user', JSON.stringify(userData))
+      // Store user data with token
+      localStorage.setItem('user', JSON.stringify(data))
 
       if (isModal) {
         onClose?.()

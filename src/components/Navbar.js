@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function Navbar({ onLoginClick, onSettingsClick }) {
+export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onThemeToggle }) {
   const [user, setUser] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
@@ -67,134 +67,176 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
   }
 
   return (
-    <nav className="relative flex justify-between items-center p-4 sm:p-6">
-      <Link href="/" className="flex items-center space-x-2 sm:space-x-4">
-        <div className="w-8 h-8 sm:w-12 sm:h-12">
+    <nav className={`relative flex justify-between items-center p-4 sm:p-6 ${isDarkMode ? 'text-white' : 'text-black'}`}>
+      {/* Left side - Logo and Title */}
+      <Link href="/" className="flex items-center space-x-2 sm:space-x-4 group">
+        <div className="w-8 h-8 sm:w-12 sm:h-12 transform transition-transform group-hover:rotate-180 duration-500">
           <svg viewBox="0 0 100 100" className="w-full h-full">
-            <circle cx="33" cy="33" r="30" className="stroke-black fill-none"/>
-            <circle cx="67" cy="33" r="30" className="stroke-black fill-none"/>
-            <circle cx="50" cy="67" r="30" className="stroke-black fill-none"/>
+            <circle 
+              cx="33" 
+              cy="33" 
+              r="30" 
+              className={`stroke-current ${isDarkMode ? 'stroke-white' : 'stroke-black'} fill-none transition-all duration-500 group-hover:fill-current`}
+            />
+            <circle 
+              cx="67" 
+              cy="33" 
+              r="30" 
+              className={`stroke-current ${isDarkMode ? 'stroke-white' : 'stroke-black'} fill-none transition-all duration-500 group-hover:fill-current`}
+            />
+            <circle 
+              cx="50" 
+              cy="67" 
+              r="30" 
+              className={`stroke-current ${isDarkMode ? 'stroke-white' : 'stroke-black'} fill-none transition-all duration-500 group-hover:fill-current`}
+            />
           </svg>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-oswald text-black">DevAtHome</h1>
+        <h1 className={`text-2xl sm:text-4xl font-oswald ${isDarkMode ? 'text-white' : 'text-black'}`}>
+          DevAtHome
+        </h1>
       </Link>
-      
-      {/* Desktop Menu */}
-      <div className="hidden sm:flex items-center space-x-8">
-        <Link href="/tableau" className="text-white hover:text-gray-600 mix-blend-difference">
-          Table
-        </Link>
-        <Link href="/about" className="text-white hover:text-gray-600 mix-blend-difference">
-          About
-        </Link>
-        {user ? (
-          <div className="relative" ref={dropdownRef}>
-            <button 
-              onClick={toggleDropdown}
-              className="text-black bg-white px-4 sm:px-6 py-2 rounded-full hover:bg-gray-100 transition-colors text-sm sm:text-base"
-            >
-              Welcome back, {user.username || user.firstName}
-            </button>
-            
-            {/* Dropdown Menu */}
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50">
-                <Link
-                  href={`/profile/${user.username}`}
-                  onClick={() => setShowDropdown(false)}
-                  className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                  <span>Profile</span>
-                </Link>
-                
-                <button 
-                  onClick={() => {
-                    setShowDropdown(false)
-                    router.push('/feed')
-                  }}
-                  className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                  </svg>
-                  <span>Feed</span>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    setShowDropdown(false)
-                    onSettingsClick()
-                  }}
-                  className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                  </svg>
-                  <span>Settings</span>
-                </button>
 
-                <button 
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-                  </svg>
-                  <span>Disconnect</span>
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button 
-            onClick={onLoginClick}
-            className="bg-white text-black px-4 sm:px-6 py-2 rounded-full hover:bg-black hover:text-white hover:border hover:border-white transition-colors"
-          >
-            Sign in
-          </button>
-        )}
-      </div>
+      {/* Right side - Navigation and Actions */}
+      <div className="flex items-center space-x-6">
+        {/* Desktop Menu */}
+        <div className="hidden sm:flex items-center space-x-8">
+          <Link href="/tableau" className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors`}>
+            Table
+          </Link>
+          <Link href="/about" className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors`}>
+            About
+          </Link>
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={toggleDropdown}
+                className={`${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'} 
+                  px-4 sm:px-6 py-2 rounded-full hover:opacity-80 transition-colors text-sm sm:text-base`}
+              >
+                Welcome back, {user.username || user.firstName}
+              </button>
+              
+              {/* Dropdown Menu */}
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50">
+                  <Link
+                    href={`/profile/${user.username}`}
+                    onClick={() => setShowDropdown(false)}
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                    <span>Profile</span>
+                  </Link>
+                  
+                  <button 
+                    onClick={() => {
+                      setShowDropdown(false)
+                      router.push('/feed')
+                    }}
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <rect x="3" y="3" width="7" height="7" rx="1" />
+                      <rect x="14" y="3" width="7" height="7" rx="1" />
+                      <rect x="3" y="14" width="7" height="7" rx="1" />
+                      <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <span>Feed</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false)
+                      onSettingsClick()
+                    }}
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                    </svg>
+                    <span>Settings</span>
+                  </button>
 
-      {/* Mobile Menu Button */}
-      <button 
-        onClick={() => setShowMobileMenu(!showMobileMenu)}
-        className="sm:hidden text-black p-2"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="h-6 w-6" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          {showMobileMenu ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
+                    </svg>
+                    <span>Disconnect</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <button 
+              onClick={onLoginClick}
+              className={`${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'} 
+                px-4 sm:px-6 py-2 rounded-full hover:opacity-80 transition-colors`}
+            >
+              Sign in
+            </button>
           )}
-        </svg>
-      </button>
+          
+          {/* Theme toggle button */}
+          <button
+            onClick={onThemeToggle}
+            className={`p-2 rounded-full ${
+              isDarkMode ? 'bg-white text-black' : 'bg-black text-white'
+            } transition-all duration-200 hover:scale-110 transform`}
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className={`sm:hidden ${isDarkMode ? 'text-white' : 'text-black'}`}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-6 w-6" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            {showMobileMenu ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
 
       {/* Mobile Menu */}
       {showMobileMenu && (
-        <div className="absolute top-full left-0 right-0 bg-white shadow-lg py-4 px-4 sm:hidden z-50">
+        <div className={`absolute top-full left-0 right-0 ${isDarkMode ? 'bg-black' : 'bg-white'} shadow-lg py-4 px-4 sm:hidden z-50`}>
           <div className="flex flex-col space-y-4">
             <Link 
               href="/tableau" 
-              className="text-black hover:text-gray-600 py-2"
+              className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors py-2`}
               onClick={() => setShowMobileMenu(false)}
             >
               Table
             </Link>
             <Link 
               href="/about" 
-              className="text-black hover:text-gray-600 py-2"
+              className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors py-2`}
               onClick={() => setShowMobileMenu(false)}
             >
               About
@@ -204,7 +246,7 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
                 <Link
                   href={`/profile/${user.username}`}
                   onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center space-x-2 text-black hover:text-gray-600 py-2"
+                  className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors py-2`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -214,7 +256,7 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
                 <Link
                   href="/feed"
                   onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center space-x-2 text-black hover:text-gray-600 py-2"
+                  className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors py-2`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -229,7 +271,7 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
                     setShowMobileMenu(false)
                     onSettingsClick()
                   }}
-                  className="flex items-center space-x-2 text-black hover:text-gray-600 py-2"
+                  className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors py-2`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -241,7 +283,7 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
                     handleLogout()
                     setShowMobileMenu(false)
                   }}
-                  className="flex items-center space-x-2 text-red-500 hover:text-red-600 py-2"
+                  className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors py-2`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
@@ -255,7 +297,7 @@ export default function Navbar({ onLoginClick, onSettingsClick }) {
                   onLoginClick()
                   setShowMobileMenu(false)
                 }}
-                className="w-full bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                className={`${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'} w-full px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors`}
               >
                 Sign in
               </button>

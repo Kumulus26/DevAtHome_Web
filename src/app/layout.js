@@ -1,23 +1,26 @@
-import { Inter } from 'next/font/google'
-import { Oswald } from 'next/font/google'
-import './globals.css'
+import { Inter } from 'next/font/google';
+import { Oswald } from 'next/font/google';
+import './globals.css';
+import Navbar from '@/components/Navbar';
 
-const inter = Inter({ subsets: ['latin'] })
-const oswald = Oswald({ 
+const inter = Inter({ subsets: ['latin'] });
+const oswald = Oswald({
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  variable: '--font-oswald',
   display: 'swap',
-})
+});
 
 export const metadata = {
   title: 'DevAtHome',
-  description: 'Your film development companion',
-}
+  description: 'Your Black & White films deserve the best',
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${oswald.variable}`}>{children}</body>
+      <body className={`${inter.className} ${oswald.variable}`}>
+        {children}
+      </body>
     </html>
-  )
+  );
 }

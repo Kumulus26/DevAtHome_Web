@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useTheme } from '../ThemeContext'
 
 function TimerContent() {
   const router = useRouter()
@@ -13,6 +14,7 @@ function TimerContent() {
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
   const [currentProcess, setCurrentProcess] = useState('developer')
+  const { isDarkMode } = useTheme()
 
   const selectedFilm = searchParams.get('film')
   const selectedDeveloper = searchParams.get('developer')
@@ -111,21 +113,31 @@ function TimerContent() {
 
   if (error) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
+      <div className={`fixed inset-0 ${isDarkMode ? 'bg-black' : 'bg-white'} flex items-center justify-center`}>
+        {/* Dot pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, ${isDarkMode ? 'white' : 'black'} 1px, transparent 0)`,
+            backgroundSize: '32px 32px',
+          }}
+        />
         <Link href="/" className="absolute top-6 left-6">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="black" className="w-8 h-8">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke={isDarkMode ? "white" : "black"} className="w-8 h-8">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
         </Link>
-        <div className="bg-[#1c1c1c] rounded-3xl p-12 max-w-xl w-full mx-4 text-center">
-          <div className="text-6xl mb-6 text-white">:(</div>
-          <p className="text-white text-2xl mb-8">
+        <div className={`${isDarkMode ? 'bg-zinc-900' : 'bg-gray-100'} rounded-3xl p-12 max-w-xl w-full mx-4 text-center`}>
+          <div className={`text-6xl mb-6 ${isDarkMode ? 'text-white' : 'text-black'}`}>:(</div>
+          <p className={`${isDarkMode ? 'text-white' : 'text-black'} text-2xl mb-8`}>
             Cette combinaison n'existe pas... Tu dois changer l'ISO ou changer le révélateur en cliquant
           </p>
           <button
             onClick={() => router.push('/tableau')}
-            className="bg-[#2a2a2a] text-white px-8 py-3 rounded-2xl text-xl font-medium 
-                     transition-all duration-300 hover:bg-[#333333] hover:scale-105"
+            className={`${isDarkMode ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-gray-200 hover:bg-gray-300'} 
+                     ${isDarkMode ? 'text-white' : 'text-black'} 
+                     px-8 py-3 rounded-2xl text-xl font-medium 
+                     transition-all duration-300 hover:scale-105`}
           >
             Ici
           </button>
@@ -135,15 +147,23 @@ function TimerContent() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-200 flex flex-col items-center justify-start sm:justify-center px-4 py-8 sm:p-6">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-black' : 'bg-white'} flex flex-col items-center justify-start sm:justify-center px-4 py-8 sm:p-6 relative`}>
+      {/* Dot pattern overlay */}
+      <div 
+        className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, ${isDarkMode ? 'white' : 'black'} 1px, transparent 0)`,
+          backgroundSize: '32px 32px',
+        }}
+      />
       <Link href="/" className="absolute top-6 left-6">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="black" className="w-6 h-6 sm:w-8 sm:h-8">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke={isDarkMode ? "white" : "black"} className="w-6 h-6 sm:w-8 sm:h-8">
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
       </Link>
-      <div className="w-full max-w-lg lg:max-w-6xl mt-16 sm:mt-0">
+      <div className="w-full max-w-lg lg:max-w-6xl mt-16 sm:mt-0 relative z-10">
         {!selectedISO ? (
-          <div className="text-black text-center max-w-lg mx-auto">
+          <div className={`text-center max-w-lg mx-auto ${isDarkMode ? 'text-white' : 'text-black'}`}>
             <h2 className="text-2xl sm:text-3xl font-light mb-8 sm:mb-12">
               At what ISO did you shoot your film?
             </h2>
@@ -152,9 +172,9 @@ function TimerContent() {
                 <button
                   key={iso}
                   onClick={() => handleISOSelect(iso)}
-                  className="bg-white hover:bg-gray-50 py-4 sm:p-6 rounded-2xl
-                           text-xl sm:text-2xl font-light transition-all duration-300
-                           hover:scale-105 shadow-lg"
+                  className={`${isDarkMode ? 'bg-zinc-900 hover:bg-zinc-800' : 'bg-white hover:bg-gray-50'} 
+                           py-4 sm:p-6 rounded-2xl text-xl sm:text-2xl font-light transition-all duration-300
+                           hover:scale-105 shadow-lg`}
                 >
                   {iso}
                 </button>
@@ -171,7 +191,9 @@ function TimerContent() {
                   className={`px-4 sm:px-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition-all duration-300
                     ${currentProcess === key 
                       ? 'bg-[#0891b2] text-white' 
-                      : 'bg-gray-400 text-white'}`}
+                      : isDarkMode 
+                        ? 'bg-zinc-800 text-gray-300 hover:bg-zinc-700' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                 >
                   {name}
                 </button>
@@ -180,10 +202,10 @@ function TimerContent() {
 
             <div className="lg:flex lg:items-start lg:gap-12 lg:justify-center">
               <div className="max-w-lg w-full">
-                <div className="bg-black rounded-[2rem] p-4 sm:p-8 flex items-center justify-between shadow-xl">
+                <div className={`${isDarkMode ? 'bg-zinc-900' : 'bg-gray-100'} rounded-[2rem] p-4 sm:p-8 flex items-center justify-between shadow-xl`}>
                   <div className="flex-1">
-                    <div className="text-gray-400 text-lg sm:text-xl mb-1 sm:mb-2">Timer</div>
-                    <div className="text-white text-5xl sm:text-7xl font-light tracking-wider mb-2 sm:mb-4">
+                    <div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-lg sm:text-xl mb-1 sm:mb-2`}>Timer</div>
+                    <div className={`${isDarkMode ? 'text-white' : 'text-black'} text-5xl sm:text-7xl font-light tracking-wider mb-2 sm:mb-4`}>
                       {formatTime(timeLeft)}
                     </div>
                     <button
@@ -191,8 +213,9 @@ function TimerContent() {
                         setTimeLeft(processes[currentProcess].time)
                         setIsTimerRunning(false)
                       }}
-                      className="px-6 sm:px-8 py-2 bg-zinc-800 text-white text-sm sm:text-base rounded-full
-                               hover:bg-zinc-700 transition-colors"
+                      className={`px-6 sm:px-8 py-2 ${isDarkMode ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-gray-200 hover:bg-gray-300'} 
+                               ${isDarkMode ? 'text-white' : 'text-black'} text-sm sm:text-base rounded-full
+                               transition-colors`}
                     >
                       Stop
                     </button>
@@ -229,15 +252,15 @@ function TimerContent() {
                 </div>
 
                 <div className="mt-4 flex justify-center">
-                  <div className="w-24 sm:w-32 h-1 bg-black rounded-full"></div>
+                  <div className={`w-24 sm:w-32 h-1 ${isDarkMode ? 'bg-white' : 'bg-black'} rounded-full`}></div>
                 </div>
               </div>
 
               {/* Instructions Section */}
               <div className="mt-8 lg:mt-0 lg:w-96">
-                <div className="bg-black rounded-[2rem] p-6 sm:p-8 shadow-xl">
-                  <h3 className="text-white text-xl font-medium mb-6">Instructions</h3>
-                  <ol className="space-y-6 text-gray-300">
+                <div className={`${isDarkMode ? 'bg-zinc-900' : 'bg-gray-100'} rounded-[2rem] p-6 sm:p-8 shadow-xl`}>
+                  <h3 className={`${isDarkMode ? 'text-white' : 'text-black'} text-xl font-medium mb-6`}>Instructions</h3>
+                  <ol className={`space-y-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     <li className="flex gap-4">
                       <span className="flex-shrink-0 w-7 h-7 bg-[#0891b2] rounded-full flex items-center justify-center text-white text-sm">1</span>
                       <p className="text-lg">Click on the timer once you start pouring the liquid.</p>
@@ -262,10 +285,20 @@ function TimerContent() {
 }
 
 export default function Timer() {
+  const { isDarkMode } = useTheme()
+  
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-zinc-200 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-black' : 'bg-white'} flex items-center justify-center relative`}>
+        {/* Dot pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, ${isDarkMode ? 'white' : 'black'} 1px, transparent 0)`,
+            backgroundSize: '32px 32px',
+          }}
+        />
+        <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${isDarkMode ? 'border-white' : 'border-black'}`}></div>
       </div>
     }>
       <TimerContent />
