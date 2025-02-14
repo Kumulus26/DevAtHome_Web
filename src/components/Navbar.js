@@ -266,28 +266,37 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               </button>
             </div>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={onThemeToggle}
-              className={`w-full mb-8 p-4 rounded-xl border ${
-                isDarkMode 
-                  ? 'border-white/20 hover:bg-white/10' 
-                  : 'border-black/20 hover:bg-black/10'
-              } transition-colors flex items-center justify-between`}
-            >
-              <span className={`text-sm font-medium`}>
-                {isDarkMode ? 'Dark Mode' : 'Light Mode'}
-              </span>
-              {isDarkMode ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
-            </button>
+            {/* Profile Link - Moved here, only show if user is logged in */}
+            {user && (
+              <div className="mb-4">
+                <Link
+                  href={`/profile/${user.username}`}
+                  className={`w-full py-3 px-4 rounded-xl border ${
+                    isDarkMode 
+                      ? 'border-white/20 hover:bg-white/10' 
+                      : 'border-black/20 hover:bg-black/10'
+                  } transition-colors flex items-center space-x-3`}
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+                    {user.profileImage ? (
+                      <img
+                        src={user.profileImage}
+                        alt={user.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                        <span className="text-gray-600 text-sm">
+                          {user.username[0].toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <span>{user.username}</span>
+                </Link>
+              </div>
+            )}
 
             {/* Navigation Links */}
             <div className="space-y-2">
@@ -311,21 +320,61 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               ))}
             </div>
 
-            {/* Sign In Button */}
-            <div className="absolute bottom-8 left-8 right-8">
+            {/* Bottom Section */}
+            <div className="absolute bottom-8 left-8 right-8 space-y-2">
+              {/* Theme Toggle */}
               <button
-                onClick={() => {
-                  onLoginClick()
-                  setShowMobileMenu(false)
-                }}
-                className={`w-full py-3 px-4 rounded-xl transition-colors ${
+                onClick={onThemeToggle}
+                className={`w-full p-4 rounded-xl border ${
                   isDarkMode 
-                    ? 'bg-white text-black hover:bg-gray-200' 
-                    : 'bg-black text-white hover:bg-gray-900'
-                }`}
+                    ? 'border-white/20 hover:bg-white/10' 
+                    : 'border-black/20 hover:bg-black/10'
+                } transition-colors flex items-center justify-between`}
               >
-                Sign in
+                <span className={`text-sm font-medium`}>
+                  {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                </span>
+                {isDarkMode ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </svg>
+                )}
               </button>
+
+              {/* Login/Logout Button */}
+              {user ? (
+                <button
+                  onClick={() => {
+                    handleLogout()
+                    setShowMobileMenu(false)
+                  }}
+                  className={`w-full py-3 px-4 rounded-xl transition-colors ${
+                    isDarkMode 
+                      ? 'bg-white text-black hover:bg-gray-200' 
+                      : 'bg-black text-white hover:bg-gray-900'
+                  }`}
+                >
+                  Log out
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onLoginClick()
+                    setShowMobileMenu(false)
+                  }}
+                  className={`w-full py-3 px-4 rounded-xl transition-colors ${
+                    isDarkMode 
+                      ? 'bg-white text-black hover:bg-gray-200' 
+                      : 'bg-black text-white hover:bg-gray-900'
+                  }`}
+                >
+                  Sign in
+                </button>
+              )}
             </div>
           </div>
         </div>
