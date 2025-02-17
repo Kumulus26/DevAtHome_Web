@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import prisma from '@/lib/prisma'
 
-// Use the original bucket name
 const BUCKET_NAME = 'devathome-photos'
 const REGION = 'eu-west-3'
 
@@ -28,7 +27,6 @@ export async function POST(request) {
       )
     }
 
-    // Find user first
     const user = await prisma.user.findUnique({
       where: { username }
     })
@@ -40,11 +38,9 @@ export async function POST(request) {
       )
     }
 
-    // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer())
     const filename = `${username}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`
 
-    // Upload to S3
     const uploadParams = {
       Bucket: BUCKET_NAME,
       Key: filename,
@@ -58,7 +54,6 @@ export async function POST(request) {
       await s3Client.send(new PutObjectCommand(uploadParams))
       console.log('File uploaded successfully to S3')
 
-      // Create URL for the uploaded file
       fileUrl = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${filename}`
       console.log('Generated file URL:', fileUrl)
     } catch (s3Error) {
@@ -71,7 +66,6 @@ export async function POST(request) {
 
     try {
       if (isProfilePicture) {
-        // Update user's profile picture
         const updatedUser = await prisma.user.update({
           where: { username },
           data: { profileImage: fileUrl },
@@ -83,7 +77,6 @@ export async function POST(request) {
           imageUrl: fileUrl
         })
       } else {
-        // Create new photo with default values for likes and comments
         const photo = await prisma.photo.create({
           data: {
             url: fileUrl,

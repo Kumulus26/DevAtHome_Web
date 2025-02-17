@@ -255,10 +255,12 @@ export default function Profile({ params }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-center text-white">Pas de photos encore...</h3>
-          <p className="text-sm sm:text-base text-gray-400 text-center max-w-sm">
-            Commencez à partager vos moments avec le monde. Vos photos apparaîtront ici dans une galerie élégante.
-          </p>
+          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-center text-white">No photos yet...</h3>
+          {isOwnProfile && (
+            <p className="text-sm sm:text-base text-gray-400 text-center max-w-sm">
+              Start sharing your moments with the world. Your photos will appear here in an elegant gallery.
+            </p>
+          )}
         </div>
       )
     }
@@ -362,7 +364,6 @@ export default function Profile({ params }) {
           <div className={`relative rounded-3xl overflow-hidden ${
             isDarkMode ? 'bg-white/5' : 'bg-black/5'
           } backdrop-blur-sm p-8 lg:p-12`}>
-            {/* Search Section */}
             <div className="max-w-4xl mx-auto px-4 pt-4 sm:pt-8">
               <div className="relative">
                 <input
@@ -419,9 +420,7 @@ export default function Profile({ params }) {
             </div>
 
             <div className="max-w-4xl mx-auto pt-8 sm:pt-20 px-4">
-              {/* Profile Header */}
               <div className="flex flex-col items-center mb-8 sm:mb-12">
-                {/* Profile Image with Edit Overlay */}
                 <div className="relative group mb-4 sm:mb-6">
                   <div className="w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden ring-4 ring-white/10 bg-gray-800">
                     <div className="w-full h-full relative">
@@ -467,15 +466,14 @@ export default function Profile({ params }) {
                   />
                 </div>
 
-                {/* Username and Location */}
                 <h1 className={`text-2xl sm:text-3xl font-bold mb-2 ${
                   isDarkMode ? 'text-white' : 'text-black'
                 }`}>
                   {user.username}
                 </h1>
-                
 
-                {/* Bio */}
+
+                
                 <div className="max-w-lg w-full text-center mb-4 sm:mb-6">
                   {isEditing ? (
                     <div className="space-y-4">
@@ -527,7 +525,6 @@ export default function Profile({ params }) {
                   )}
                 </div>
 
-                {/* Stats */}
                 <div className="flex flex-wrap justify-center gap-8 sm:gap-16 mt-8">
                   <div className="text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" 
@@ -581,7 +578,7 @@ export default function Profile({ params }) {
                   </div>
                 </div>
 
-                
+                  
                 {activeTab === 'photos' && isOwnProfile && (
                   <div className="w-full flex justify-end mb-4 sm:mb-6 space-x-2">
                     <input
@@ -630,7 +627,7 @@ export default function Profile({ params }) {
                   </div>
                 )}
 
-                {/* Photos Grid */}
+                
                 <div className="w-full">
                   <PhotoGrid photos={user.photos || []} />
                 </div>

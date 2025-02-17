@@ -17,7 +17,6 @@ export default function PhotoPage({ params }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    // Get logged in user from localStorage
     const loggedInUser = localStorage.getItem('user')
     if (loggedInUser) {
       setUser(JSON.parse(loggedInUser))
@@ -157,13 +156,11 @@ export default function PhotoPage({ params }) {
   }
 
   const handleOutsideClick = (e) => {
-    // Check if the click is outside both the photo and comments section
     if (e.target.classList.contains('modal-backdrop')) {
       router.back()
     }
   }
 
-  // Loading state
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center">
@@ -172,7 +169,6 @@ export default function PhotoPage({ params }) {
     )
   }
 
-  // Error state
   if (!photo) {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center">
@@ -195,7 +191,6 @@ export default function PhotoPage({ params }) {
         className="flex max-w-6xl w-full h-[90vh] bg-black rounded-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left side - Photo */}
         <div className="flex-1 relative bg-black flex items-center justify-center">
           <Image
             src={photo.url}
@@ -206,9 +201,7 @@ export default function PhotoPage({ params }) {
           />
         </div>
 
-        {/* Right side - Comments */}
         <div className="w-96 bg-black flex flex-col">
-          {/* User info header */}
           <div className="p-4 border-b border-gray-800">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden">
@@ -237,7 +230,6 @@ export default function PhotoPage({ params }) {
             </div>
           </div>
 
-          {/* Comments section */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {comments.map((comment) => (
               <div key={comment.id} className="flex space-x-3">
@@ -281,7 +273,6 @@ export default function PhotoPage({ params }) {
             ))}
           </div>
 
-          {/* Like and comment actions */}
           <div className="border-t border-gray-800 p-4">
             <div className="flex items-center space-x-4 mb-4">
               <button 

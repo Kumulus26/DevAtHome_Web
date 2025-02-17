@@ -58,7 +58,6 @@ export default function Home() {
       <div className={`min-h-screen relative overflow-hidden ${
         showLogin || showSignUp || showSettings ? 'blur-sm transition-all duration-200' : ''
       } ${isDarkMode ? 'text-white' : 'text-black'}`}>
-        {/* Dynamic background */}
         <div className={`absolute inset-0 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
           <div 
             className={`absolute inset-0 ${
@@ -69,7 +68,6 @@ export default function Home() {
           ></div>
         </div>
 
-        {/* Content */}
         <div className="relative">
           <Navbar 
             onLoginClick={handleLoginClick}
@@ -78,13 +76,11 @@ export default function Home() {
             onThemeToggle={toggleTheme}
           />
 
-          {/* Main Content */}
           <main className="container mx-auto px-6 py-12">
             <div className={`relative rounded-3xl overflow-hidden ${
               isDarkMode ? 'bg-white/5' : 'bg-black/5'
             } backdrop-blur-sm p-8 lg:p-12`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Left Column */}
                 <div className="space-y-8 relative z-10">
                   <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-black'}`}>
                     Your 
@@ -103,7 +99,6 @@ export default function Home() {
                     The development at home will no longer be a secret for you.
                   </p>
                   
-                  {/* Stats Section */}
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mt-8 sm:mt-16">
                     <div className={`${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'} 
                       w-full sm:w-auto p-6 sm:p-8 rounded-2xl backdrop-blur-sm transform transition-all duration-300 hover:scale-105 
@@ -147,7 +142,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Settings Modal */}
       {showSettings && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center"
@@ -165,7 +159,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Login Modal */}
       {showLogin && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -181,7 +174,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* SignUp Modal */}
       {showSignUp && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -197,14 +189,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* Mobile Menu */}
       <div className={`fixed inset-0 bg-black/60 backdrop-blur-md z-50 transition-all duration-300 ${
         isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}>
         <div className={`fixed inset-y-0 left-0 w-72 ${isDarkMode ? 'bg-gray-900' : 'bg-white'} p-6 shadow-2xl transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          {/* Logo and Close Button */}
           <div className="flex justify-between items-center mb-10">
             <Link href="/" className="flex items-center space-x-2">
               <Image src="/logo.svg" alt="DevAtHome Logo" width={32} height={32} />
@@ -224,7 +214,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Navigation Links - Centered */}
           <nav className="space-y-2 flex flex-col items-center mt-10">
             {[
               { href: '/table', icon: TableIcon, label: 'Table' },
@@ -249,12 +238,10 @@ export default function Home() {
             ))}
           </nav>
 
-          {/* Divider */}
           <div className={`my-6 border-t ${
             isDarkMode ? 'border-white/10' : 'border-black/10'
           }`} />
 
-          {/* Bottom Actions - Centered */}
           <div className="space-y-2 flex flex-col items-center">
             {[
               { icon: SettingsIcon, label: 'Settings' },
@@ -277,8 +264,6 @@ export default function Home() {
               </button>
             ))}
           </div>
-
-          {/* Version or Additional Info - Centered */}
           <div className={`absolute bottom-6 left-0 right-0 text-sm text-center ${
             isDarkMode ? 'text-gray-500' : 'text-gray-400'
           }`}>

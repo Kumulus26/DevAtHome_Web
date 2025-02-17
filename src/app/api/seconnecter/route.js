@@ -38,7 +38,6 @@ export async function POST(request) {
       )
     }
 
-    // Generate token with 15-minute expiration
     const token = jwt.sign(
       { userId: user.id },
       JWT_SECRET,

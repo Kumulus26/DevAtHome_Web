@@ -14,7 +14,6 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Add function to check token expiration
   const checkTokenExpiration = () => {
     const userData = localStorage.getItem('user')
     if (userData) {
@@ -23,7 +22,6 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
         try {
           const decodedToken = JSON.parse(atob(token.split('.')[1]))
           if (decodedToken.exp * 1000 < Date.now()) {
-            // Token has expired
             localStorage.removeItem('user')
             window.location.reload()
           }
@@ -35,10 +33,9 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
     }
   }
 
-  // Check token expiration on component mount and periodically
   useEffect(() => {
     checkTokenExpiration()
-    const interval = setInterval(checkTokenExpiration, 60000) // Check every minute
+    const interval = setInterval(checkTokenExpiration, 60000)
     return () => clearInterval(interval)
   }, [])
 
@@ -69,7 +66,6 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
         throw new Error(data.error || 'Login failed')
       }
 
-      // Store user data with token
       localStorage.setItem('user', JSON.stringify(data))
 
       if (isModal) {
@@ -98,9 +94,7 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
       onClick={handleBackgroundClick}
     >
       <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        {/* Login Form Container */}
         <div className="bg-zinc-900 rounded-2xl p-8 shadow-xl backdrop-blur-sm">
-          {/* Logo and Title - Moved inside */}
           <div className="text-center mb-8">
             <div className="w-12 h-12 mx-auto mb-4">
               <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -180,7 +174,6 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
             </button>
           </form>
 
-          {/* Sign up link */}
           <div className="mt-8 text-center">
             <p className="text-zinc-400">
               Don't have an account?{' '}
@@ -202,7 +195,6 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
           </div>
         </div>
 
-        {/* Footer - Only show when not in modal mode */}
         {!isModal && (
           <div className="mt-12 text-center">
             <p className="text-zinc-400">

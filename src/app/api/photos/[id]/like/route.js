@@ -6,7 +6,6 @@ export async function POST(request, { params }) {
     const { id } = params
     const { userId } = await request.json()
 
-    // Check if the user has already liked the photo
     const existingLike = await prisma.like.findUnique({
       where: {
         userId_photoId: {
@@ -17,7 +16,6 @@ export async function POST(request, { params }) {
     })
 
     if (existingLike) {
-      // Unlike the photo
       await prisma.like.delete({
         where: {
           userId_photoId: {
@@ -27,7 +25,6 @@ export async function POST(request, { params }) {
         }
       })
 
-      // Decrement the likes count
       await prisma.photo.update({
         where: { id: parseInt(id) },
         data: {
@@ -39,7 +36,6 @@ export async function POST(request, { params }) {
 
       return NextResponse.json({ liked: false })
     } else {
-      // Like the photo
       await prisma.like.create({
         data: {
           user: {
@@ -50,8 +46,7 @@ export async function POST(request, { params }) {
           }
         }
       })
-
-      // Increment the likes count
+      
       await prisma.photo.update({
         where: { id: parseInt(id) },
         data: {

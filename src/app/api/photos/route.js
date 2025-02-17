@@ -3,14 +3,12 @@ import prisma from '@/lib/prisma'
 
 export async function GET(request) {
   try {
-    // Get the userId from the query parameters if user is logged in
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
-    // Fetch all photos with user info and likes
     const photos = await prisma.photo.findMany({
       orderBy: {
-        createdAt: 'desc'  // Most recent photos first
+        createdAt: 'desc'
       },
       include: {
         user: {
@@ -31,7 +29,6 @@ export async function GET(request) {
       }
     })
 
-    // Format the response
     const formattedPhotos = photos.map(photo => ({
       id: photo.id,
       url: photo.url,

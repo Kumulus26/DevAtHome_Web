@@ -256,7 +256,6 @@ export default function Settings({ isModal = false, onClose }) {
           </div>
         </form>
 
-        {/* Delete Account Section */}
         <div className="mt-8 pt-6 border-t border-zinc-800">
           <div className="flex flex-col items-center">
             {!showDeleteConfirm ? (

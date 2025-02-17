@@ -6,7 +6,6 @@ export async function GET(request, context) {
     const params = await context.params
     const username = params.username
 
-    // Get user data with photos and aggregated stats
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
@@ -38,12 +37,10 @@ export async function GET(request, context) {
       )
     }
 
-    // Calculate total likes and comments
     const totalLikes = user.photos.reduce((sum, photo) => sum + photo.likes, 0)
     const totalComments = user.photos.reduce((sum, photo) => sum + photo.comments, 0)
     const totalPhotos = user.photos.length
 
-    // Prepare the response
     const response = {
       ...user,
       stats: {

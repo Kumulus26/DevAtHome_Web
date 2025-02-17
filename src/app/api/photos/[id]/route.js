@@ -6,7 +6,6 @@ export async function GET(request, context) {
     const params = await context.params
     const photoId = parseInt(params.id)
     
-    // Get the userId from the query parameters
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
@@ -45,13 +44,11 @@ export async function GET(request, context) {
       )
     }
 
-    // Add isLiked field to the response
     const response = {
       ...photo,
       isLiked: userId ? photo.likedBy.length > 0 : false
     }
     
-    // Remove likedBy from response as we don't need to send it to the client
     delete response.likedBy
 
     return NextResponse.json(response)

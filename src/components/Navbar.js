@@ -21,7 +21,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
           if (parsedUser && typeof parsedUser === 'object') {
             setUser(parsedUser)
           } else {
-            // Invalid user data, clear it
             localStorage.removeItem('user')
             setUser(null)
           }
@@ -30,7 +29,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
         }
       } catch (error) {
         console.error('Error parsing user data:', error)
-        // Clear invalid data
         localStorage.removeItem('user')
         setUser(null)
       }
@@ -69,7 +67,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
 
   return (
     <nav className={`relative flex justify-between items-center p-4 sm:p-6 ${isDarkMode ? 'text-white' : 'text-black'}`}>
-      {/* Left side - Logo and Title */}
       <Link href="/" className="flex items-center space-x-2 sm:space-x-4 group">
         <div className="w-8 h-8 sm:w-12 sm:h-12 transform transition-transform group-hover:rotate-180 duration-500">
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -98,9 +95,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
         </h1>
       </Link>
 
-      {/* Right side - Navigation and Actions */}
       <div className="flex items-center space-x-6">
-        {/* Desktop Menu */}
         <div className="hidden sm:flex items-center space-x-8">
           <Link href="/tableau" className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors`}>
             Table
@@ -118,7 +113,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
                 Welcome back, {user.username || user.firstName}
               </button>
               
-              {/* Dropdown Menu */}
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50">
                   <Link
@@ -183,7 +177,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
             </button>
           )}
           
-          {/* Theme toggle button */}
           <button
             onClick={onThemeToggle}
             className={`p-2 rounded-full ${
@@ -203,7 +196,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
           </button>
         </div>
 
-        {/* Mobile Menu Button */}
         <button 
           onClick={() => setShowMobileMenu(!showMobileMenu)}
           className={`sm:hidden ${isDarkMode ? 'text-white' : 'text-black'}`}
@@ -224,13 +216,11 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {showMobileMenu && (
         <div className={`fixed inset-0 z-50 ${isDarkMode ? 'bg-black/90' : 'bg-white/90'} backdrop-blur-sm`}>
           <div className={`fixed inset-y-0 right-0 w-80 ${
             isDarkMode ? 'bg-black' : 'bg-white'
           } p-8 shadow-2xl`}>
-            {/* Menu Header */}
             <div className="flex justify-between items-center mb-12">
               <Link href="/" className="flex items-center space-x-2 group">
                 <div className="w-8 h-8 transform transition-transform group-hover:rotate-180 duration-500">
@@ -266,7 +256,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               </button>
             </div>
 
-            {/* Profile Link - Moved here, only show if user is logged in */}
             {user && (
               <div className="mb-4">
                 <Link
@@ -298,7 +287,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               </div>
             )}
 
-            {/* Navigation Links */}
             <div className="space-y-2">
               {[
                 { href: '/tableau', label: 'Table' },
@@ -320,9 +308,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               ))}
             </div>
 
-            {/* Bottom Section */}
             <div className="absolute bottom-8 left-8 right-8 space-y-2">
-              {/* Theme Toggle */}
               <button
                 onClick={onThemeToggle}
                 className={`w-full p-4 rounded-xl border ${
@@ -344,8 +330,6 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
                   </svg>
                 )}
               </button>
-
-              {/* Login/Logout Button */}
               {user ? (
                 <button
                   onClick={() => {

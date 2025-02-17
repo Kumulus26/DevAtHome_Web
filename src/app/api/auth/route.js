@@ -9,7 +9,6 @@ export async function POST(request) {
 
     const { firstName, lastName, email, dateOfBirth, password, username } = body;
 
-    // Validate required fields
     if (!firstName || !lastName || !email || !dateOfBirth || !password || !username) {
       return NextResponse.json(
         { error: 'All fields are required' },
@@ -25,10 +24,8 @@ export async function POST(request) {
       username
     });
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user with minimal required fields
     const user = await prisma.user.create({
       data: {
         firstName,
@@ -43,7 +40,6 @@ export async function POST(request) {
 
     console.log('User created successfully:', user.id);
 
-    // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(
@@ -58,7 +54,6 @@ export async function POST(request) {
       stack: error.stack
     });
 
-    // Check for specific Prisma errors
     if (error.code === 'P2002') {
       return NextResponse.json(
         { error: 'This email or username is already taken' },

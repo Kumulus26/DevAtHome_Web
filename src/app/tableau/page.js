@@ -171,7 +171,6 @@ export default function Tableau() {
       } ${isDarkMode ? 'text-white' : 'text-black'}`}>
         <Background isDarkMode={isDarkMode} />
 
-        {/* Content */}
         <div className="relative">
           <Navbar 
             onLoginClick={handleLoginClick}
@@ -179,10 +178,8 @@ export default function Tableau() {
             onThemeToggle={toggleTheme}
           />
 
-          {/* Main Content */}
           <main className="container mx-auto px-6 py-12">
             <div className="flex flex-col items-center justify-center space-y-16">
-              {/* Initial Question */}
               <div 
                 className={`transform transition-all duration-1000 ${
                   showQuestion ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
@@ -195,7 +192,6 @@ export default function Tableau() {
                 </h2>
               </div>
 
-              {/* Film Grid - Now wrapped in a container with padding */}
               <div 
                 className={`w-full px-4 transform transition-all duration-1000 delay-500 ${
                   showQuestion ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
@@ -204,7 +200,6 @@ export default function Tableau() {
                 {renderImageGrid(films, selectedFilm, handleFilmSelect)}
               </div>
 
-              {/* Second Question - Only show if film is selected */}
               {selectedFilm && (
                 <>
                   <div className="transform transition-all duration-1000 opacity-0 animate-fade-in">
@@ -224,7 +219,6 @@ export default function Tableau() {
         </div>
       </div>
 
-      {/* Loader */}
       {showLoader && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-zinc-900 rounded-2xl p-8 shadow-xl text-center">
@@ -240,7 +234,6 @@ export default function Tableau() {
         </div>
       )}
 
-      {/* Login Modal */}
       {showLogin && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -256,7 +249,6 @@ export default function Tableau() {
         </div>
       )}
 
-      {/* SignUp Modal */}
       {showSignUp && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"

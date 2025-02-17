@@ -208,7 +208,6 @@ export default function Feed() {
               <div className="space-y-6">
                 {photos.map((photo) => (
                   <div key={photo.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    {/* Photo Header */}
                     <div className="flex items-center p-4">
                       <Link href={`/profile/${photo.user.username}`} className="flex items-center">
                         <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
@@ -234,7 +233,6 @@ export default function Feed() {
                       </Link>
                     </div>
 
-                    {/* Photo */}
                     <div className="relative aspect-square bg-black">
                       <Image
                         src={photo.url}
@@ -246,7 +244,6 @@ export default function Feed() {
                       />
                     </div>
 
-                    {/* Actions */}
                     <div className="p-4">
                       <div className="flex items-center space-x-4">
                         <button 
@@ -278,12 +275,10 @@ export default function Feed() {
                         </button>
                       </div>
 
-                      {/* Likes count */}
                       <div className="mt-2">
                         <span className="font-medium text-sm">{photo.likes} likes</span>
                       </div>
 
-                      {/* Caption */}
                       {photo.title && (
                         <div className="mt-1">
                           <Link href={`/profile/${photo.user.username}`} className="font-medium text-sm hover:underline">
@@ -293,7 +288,6 @@ export default function Feed() {
                         </div>
                       )}
 
-                      {/* View all comments */}
                       {photo.commentsCount > 0 && (
                         <Link 
                           href={`/p/${photo.id}`}
@@ -303,7 +297,6 @@ export default function Feed() {
                         </Link>
                       )}
 
-                      {/* Comment form */}
                       {commentingPhotoId === photo.id && (
                         <div className="mt-3 flex items-center">
                           <input
@@ -328,7 +321,6 @@ export default function Feed() {
                         </div>
                       )}
 
-                      {/* Timestamp */}
                       <div className="mt-2 text-xs text-gray-500">
                         {new Date(photo.createdAt).toLocaleDateString('en-US', {
                           month: 'long',
@@ -344,7 +336,6 @@ export default function Feed() {
         </main>
       </div>
 
-      {/* Login Modal */}
       {showLogin && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -360,7 +351,6 @@ export default function Feed() {
         </div>
       )}
 
-      {/* SignUp Modal */}
       {showSignUp && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"

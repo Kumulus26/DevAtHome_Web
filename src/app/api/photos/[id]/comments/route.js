@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-// GET /api/photos/[id]/comments - Get comments for a photo
 export async function GET(request, { params }) {
   try {
     const { id } = params
@@ -33,7 +32,6 @@ export async function GET(request, { params }) {
   }
 }
 
-// POST /api/photos/[id]/comments - Create a new comment
 export async function POST(request, { params }) {
   try {
     const { id } = params
@@ -59,7 +57,6 @@ export async function POST(request, { params }) {
       }
     })
 
-    // Update the comments count on the photo
     await prisma.photo.update({
       where: { id: parseInt(id) },
       data: {
@@ -79,7 +76,6 @@ export async function POST(request, { params }) {
   }
 }
 
-// DELETE /api/photos/[id]/comments - Delete a comment
 export async function DELETE(request, { params }) {
   try {
     const { commentId, userId } = await request.json()
@@ -88,7 +84,6 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Get the comment to check permissions
     const comment = await prisma.comment.findUnique({
       where: { id: parseInt(commentId) },
       include: {
@@ -104,12 +99,10 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Comment not found' }, { status: 404 })
     }
 
-    // Check if user is authorized to delete the comment
     if (comment.userId !== parseInt(userId) && comment.photo.userId !== parseInt(userId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Use a transaction to ensure both operations succeed or fail together
     await prisma.$transaction([
       prisma.comment.delete({
         where: { id: parseInt(commentId) }

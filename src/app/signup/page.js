@@ -25,7 +25,6 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
       ...prev,
       [name]: value
     }))
-    // Clear error when user starts typing again
     if (error) setError('')
   }
 
@@ -34,7 +33,6 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
     setError('')
     setLoading(true)
 
-    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -42,7 +40,7 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
     }
 
     try {
-      const { confirmPassword, ...dataToSend } = formData // Remove confirmPassword from data to send
+      const { confirmPassword, ...dataToSend } = formData
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
@@ -83,9 +81,7 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
       onClick={handleBackgroundClick}
     >
       <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        {/* SignUp Form Container */}
         <div className="bg-zinc-900 rounded-2xl p-8 shadow-xl backdrop-blur-sm">
-          {/* Logo and Title - Moved inside */}
           <div className="text-center mb-8">
             <div className="w-12 h-12 mx-auto mb-4">
               <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -211,7 +207,6 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
             </button>
           </form>
 
-          {/* Sign in link */}
           <div className="mt-6 text-center">
             <p className="text-zinc-400">
               Already have an account?{' '}

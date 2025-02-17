@@ -115,7 +115,6 @@ function TimerContent() {
   if (error) {
     return (
       <div className={`fixed inset-0 ${isDarkMode ? 'bg-black' : 'bg-white'} flex items-center justify-center`}>
-        {/* Dot pattern overlay */}
         <div 
           className="absolute inset-0 opacity-5"
           style={{
@@ -153,7 +152,6 @@ function TimerContent() {
       
       <div className="relative">
         <div className={`min-h-screen ${isDarkMode ? 'bg-black' : 'bg-white'} flex flex-col items-center justify-start sm:justify-center px-4 py-8 sm:p-6 relative`}>
-          {/* Dot pattern overlay */}
           <div 
             className="absolute inset-0 opacity-5"
             style={{
@@ -260,8 +258,6 @@ function TimerContent() {
                       <div className={`w-24 sm:w-32 h-1 ${isDarkMode ? 'bg-white' : 'bg-black'} rounded-full`}></div>
                     </div>
                   </div>
-
-                  {/* Instructions Section */}
                   <div className="mt-8 lg:mt-0 lg:w-96">
                     <div className={`${isDarkMode ? 'bg-zinc-900' : 'bg-gray-100'} rounded-[2rem] p-6 sm:p-8 shadow-xl`}>
                       <h3 className={`${isDarkMode ? 'text-white' : 'text-black'} text-xl font-medium mb-6`}>Instructions</h3>

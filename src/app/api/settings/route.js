@@ -11,7 +11,6 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    // Find the user
     const user = await prisma.user.findUnique({
       where: { id: userId }
     })
@@ -20,7 +19,6 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Check if username is already taken by another user
     if (username && username !== user.username) {
       const existingUser = await prisma.user.findUnique({
         where: { username }
@@ -30,13 +28,11 @@ export async function PUT(request) {
       }
     }
 
-    // Prepare update data
     const updateData = {}
     if (firstName) updateData.firstName = firstName
     if (lastName) updateData.lastName = lastName
     if (username) updateData.username = username
 
-    // Handle password update if provided
     if (currentPassword && newPassword) {
       const isValidPassword = await bcrypt.compare(currentPassword, user.password)
       if (!isValidPassword) {
@@ -45,13 +41,11 @@ export async function PUT(request) {
       updateData.password = await bcrypt.hash(newPassword, 10)
     }
 
-    // Update the user
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
     })
 
-    // Return updated user data
     return NextResponse.json({
       message: 'Settings updated successfully',
       user: {
@@ -76,7 +70,6 @@ export async function DELETE(request) {
   try {
     const { userId } = await request.json()
 
-    // Delete the user
     await prisma.user.delete({
       where: { id: userId }
     })
