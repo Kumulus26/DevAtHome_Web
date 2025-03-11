@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 const BUCKET_NAME = 'devathome-photos'
 const REGION = 'eu-west-3'
@@ -27,16 +27,20 @@ export async function POST(request) {
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username }
-    })
+    // Find user by username
+    const [users] = await pool.query(
+      'SELECT * FROM User WHERE username = ?',
+      [username]
+    )
 
-    if (!user) {
+    if (users.length === 0) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       )
     }
+
+    const user = users[0]
 
     const buffer = Buffer.from(await file.arrayBuffer())
     const filename = `${username}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`
@@ -66,29 +70,39 @@ export async function POST(request) {
 
     try {
       if (isProfilePicture) {
-        const updatedUser = await prisma.user.update({
-          where: { username },
-          data: { profileImage: fileUrl },
-        })
+        // Update user profile image
+        await pool.query(
+          'UPDATE User SET profileImage = ? WHERE id = ?',
+          [fileUrl, user.id]
+        )
+
+        // Get updated user
+        const [updatedUsers] = await pool.query(
+          'SELECT * FROM User WHERE id = ?',
+          [user.id]
+        )
 
         return NextResponse.json({
           success: true,
-          user: updatedUser,
+          user: updatedUsers[0],
           imageUrl: fileUrl
         })
       } else {
-        const photo = await prisma.photo.create({
-          data: {
-            url: fileUrl,
-            userId: user.id,
-            likes: 0,
-            commentsCount: 0
-          }
-        })
+        // Create new photo
+        const [result] = await pool.query(
+          'INSERT INTO Photo (url, userId, likes, commentsCount) VALUES (?, ?, ?, ?)',
+          [fileUrl, user.id, 0, 0]
+        )
+
+        // Get the created photo
+        const [photos] = await pool.query(
+          'SELECT * FROM Photo WHERE id = ?',
+          [result.insertId]
+        )
 
         return NextResponse.json({
           success: true,
-          photo
+          photo: photos[0]
         })
       }
     } catch (dbError) {

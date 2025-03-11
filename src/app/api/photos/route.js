@@ -1,44 +1,49 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
-    const photos = await prisma.photo.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            profileImage: true
-          }
-        },
-        likedBy: userId ? {
-          where: {
-            userId: parseInt(userId)
-          },
-          select: {
-            userId: true
-          }
-        } : false
-      }
-    })
+    // Get all photos with user information
+    const [photos] = await pool.query(`
+      SELECT 
+        p.id, p.url, p.title, p.likes, p.commentsCount, p.createdAt,
+        u.id as userId, u.username, u.profileImage
+      FROM Photo p
+      JOIN User u ON p.userId = u.id
+      ORDER BY p.createdAt DESC
+    `);
 
-    const formattedPhotos = photos.map(photo => ({
-      id: photo.id,
-      url: photo.url,
-      title: photo.title,
-      likes: photo.likes,
-      commentsCount: photo.commentsCount,
-      createdAt: photo.createdAt,
-      user: photo.user,
-      isLiked: userId ? photo.likedBy.length > 0 : false
-    }))
+    // Format the results
+    const formattedPhotos = await Promise.all(photos.map(async (photo) => {
+      let isLiked = false;
+      
+      // Check if the photo is liked by the user
+      if (userId) {
+        const [likes] = await pool.query(
+          'SELECT * FROM `Like` WHERE photoId = ? AND userId = ?',
+          [photo.id, parseInt(userId)]
+        );
+        isLiked = likes.length > 0;
+      }
+
+      return {
+        id: photo.id,
+        url: photo.url,
+        title: photo.title,
+        likes: photo.likes,
+        commentsCount: photo.commentsCount,
+        createdAt: photo.createdAt,
+        user: {
+          id: photo.userId,
+          username: photo.username,
+          profileImage: photo.profileImage
+        },
+        isLiked
+      };
+    }));
 
     return NextResponse.json(formattedPhotos)
   } catch (error) {

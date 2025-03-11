@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -68,7 +68,7 @@ model hp5hc110 {
 }
 
 model hp5ilfosol3 {
-  id        Int      @id(map: "hp5ilfosol3_data_pkey") @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)
@@ -138,7 +138,7 @@ model tmax400rodinal {
 }
 
 model tmax400tmaxdev {
-  id        Int      @id(map: "tmaxtmaxdev_pkey") @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)
@@ -239,7 +239,7 @@ model rpx400tmaxdev {
 }
 
 model tmax400ilfoteclc29 {
-  id        Int      @id(map: "tmaxilfoteclc29_pkey") @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)

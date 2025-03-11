@@ -1,68 +1,93 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 export async function POST(request, { params }) {
+  // Get a connection from the pool to use for transaction
+  const connection = await pool.getConnection()
+  
   try {
-    const { id } = params
+    const id = await params.id
+    const photoId = parseInt(id)
     const { userId } = await request.json()
 
-    const existingLike = await prisma.like.findUnique({
-      where: {
-        userId_photoId: {
-          userId: parseInt(userId),
-          photoId: parseInt(id)
-        }
-      }
-    })
+    if (!photoId || !userId) {
+      return NextResponse.json(
+        { error: 'Photo ID and User ID are required' },
+        { status: 400 }
+      )
+    }
 
-    if (existingLike) {
-      await prisma.like.delete({
-        where: {
-          userId_photoId: {
-            userId: parseInt(userId),
-            photoId: parseInt(id)
-          }
-        }
+    // Start transaction
+    await connection.beginTransaction()
+
+    // Check if like already exists
+    const [existingLikes] = await connection.query(
+      'SELECT * FROM `Like` WHERE photoId = ? AND userId = ?',
+      [photoId, userId]
+    )
+
+    if (existingLikes.length > 0) {
+      // Unlike: Remove the like
+      await connection.query(
+        'DELETE FROM `Like` WHERE photoId = ? AND userId = ?',
+        [photoId, userId]
+      )
+
+      // Decrease likes count
+      await connection.query(
+        'UPDATE Photo SET likes = GREATEST(likes - 1, 0) WHERE id = ?',
+        [photoId]
+      )
+
+      // Get updated like count
+      const [updatedPhoto] = await connection.query(
+        'SELECT likes FROM Photo WHERE id = ?',
+        [photoId]
+      )
+
+      await connection.commit()
+
+      return NextResponse.json({ 
+        liked: false,
+        likes: updatedPhoto[0].likes
       })
-
-      await prisma.photo.update({
-        where: { id: parseInt(id) },
-        data: {
-          likes: {
-            decrement: 1
-          }
-        }
-      })
-
-      return NextResponse.json({ liked: false })
     } else {
-      await prisma.like.create({
-        data: {
-          user: {
-            connect: { id: parseInt(userId) }
-          },
-          photo: {
-            connect: { id: parseInt(id) }
-          }
-        }
-      })
-      
-      await prisma.photo.update({
-        where: { id: parseInt(id) },
-        data: {
-          likes: {
-            increment: 1
-          }
-        }
-      })
+      // Like: Add new like
+      await connection.query(
+        'INSERT INTO `Like` (userId, photoId) VALUES (?, ?)',
+        [userId, photoId]
+      )
 
-      return NextResponse.json({ liked: true })
+      // Increase likes count
+      await connection.query(
+        'UPDATE Photo SET likes = likes + 1 WHERE id = ?',
+        [photoId]
+      )
+
+      // Get updated like count
+      const [updatedPhoto] = await connection.query(
+        'SELECT likes FROM Photo WHERE id = ?',
+        [photoId]
+      )
+
+      await connection.commit()
+
+      return NextResponse.json({ 
+        liked: true,
+        likes: updatedPhoto[0].likes
+      })
     }
   } catch (error) {
+    // Rollback transaction on error
+    await connection.rollback()
+    
     console.error('Error handling like:', error)
     return NextResponse.json(
       { error: 'Error handling like' },
       { status: 500 }
     )
+  } finally {
+    // Release the connection back to the pool
+    connection.release()
   }
 } 

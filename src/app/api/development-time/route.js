@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 export async function POST(request) {
   try {
@@ -38,17 +38,13 @@ export async function POST(request) {
     const tableName = `${filmName}${devName}`
     console.log('Looking up table:', tableName)
 
-    const result = await prisma[tableName].findFirst({
-      where: {
-        asa_iso: iso
-      },
-      select: {
-        time_35mm: true,
-        dilution: true
-      }
-    })
+    // Use backticks around table name to handle special characters
+    const [results] = await pool.query(
+      `SELECT time_35mm, dilution FROM \`${tableName}\` WHERE asa_iso = ?`,
+      [iso]
+    )
 
-    if (!result) {
+    if (results.length === 0) {
       console.log('No results found for:', { tableName, iso })
       return NextResponse.json(
         { error: 'Development time not found' },
@@ -56,6 +52,7 @@ export async function POST(request) {
       )
     }
 
+    const result = results[0]
     const time = typeof result.time_35mm === 'string' 
       ? parseFloat(result.time_35mm) 
       : Number(result.time_35mm)

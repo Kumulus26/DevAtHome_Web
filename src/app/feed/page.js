@@ -304,7 +304,7 @@ export default function Feed() {
                             placeholder="Add a comment..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            className="flex-1 bg-transparent text-sm border-gray-300 focus:ring-black focus:border-black rounded-lg"
+                            className="flex-1 bg-transparent text-black text-sm border-gray-300 focus:ring-black focus:border-black rounded-lg"
                             onKeyPress={(e) => {
                               if (e.key === 'Enter') {
                                 handleComment(photo.id)

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 export async function GET(request, context) {
   try {
@@ -16,40 +16,51 @@ export async function GET(request, context) {
       )
     }
 
-    const photo = await prisma.photo.findUnique({
-      where: { id: photoId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            profileImage: true
-          }
-        },
-        likedBy: userId ? {
-          where: {
-            userId: parseInt(userId)
-          },
-          select: {
-            id: true
-          }
-        } : false
-      }
-    })
+    // Get photo with user information
+    const [photos] = await pool.query(
+      `SELECT 
+        p.id, p.url, p.title, p.likes, p.commentsCount, p.createdAt,
+        u.id as userId, u.username, u.profileImage
+      FROM Photo p
+      JOIN User u ON p.userId = u.id
+      WHERE p.id = ?`,
+      [photoId]
+    )
 
-    if (!photo) {
+    if (photos.length === 0) {
       return NextResponse.json(
         { error: 'Photo not found' },
         { status: 404 }
       )
     }
 
-    const response = {
-      ...photo,
-      isLiked: userId ? photo.likedBy.length > 0 : false
-    }
+    const photo = photos[0]
     
-    delete response.likedBy
+    // Check if the photo is liked by the user
+    let isLiked = false
+    if (userId) {
+      const [likes] = await pool.query(
+        'SELECT * FROM `Like` WHERE photoId = ? AND userId = ?',
+        [photoId, parseInt(userId)]
+      )
+      isLiked = likes.length > 0
+    }
+
+    // Format the response
+    const response = {
+      id: photo.id,
+      url: photo.url,
+      title: photo.title,
+      likes: photo.likes,
+      commentsCount: photo.commentsCount,
+      createdAt: photo.createdAt,
+      user: {
+        id: photo.userId,
+        username: photo.username,
+        profileImage: photo.profileImage
+      },
+      isLiked
+    }
 
     return NextResponse.json(response)
 

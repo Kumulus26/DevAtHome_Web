@@ -1,25 +1,30 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 export async function PUT(request) {
   try {
     const { username, bio } = await request.json()
 
-    const updatedUser = await prisma.user.update({
-      where: { username },
-      data: { bio },
-      select: {
-        id: true,
-        username: true,
-        firstName: true,
-        lastName: true,
-        bio: true,
-        profileImage: true,
-        email: true,
-      }
-    })
+    // Update user bio
+    await pool.query(
+      'UPDATE User SET bio = ? WHERE username = ?',
+      [bio, username]
+    )
 
-    return NextResponse.json(updatedUser)
+    // Get updated user
+    const [users] = await pool.query(
+      'SELECT id, username, firstName, lastName, bio, profileImage, email FROM User WHERE username = ?',
+      [username]
+    )
+
+    if (users.length === 0) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(users[0])
   } catch (error) {
     console.error('Profile update error:', error)
     return NextResponse.json(

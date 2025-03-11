@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
-import prisma from '@/lib/prisma'
+import pool from '@/lib/db'
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION,
@@ -11,26 +11,32 @@ const s3Client = new S3Client({
 })
 
 export async function DELETE(request, { params }) {
+  const connection = await pool.getConnection()
+  
   try {
-    const { id } = params
+    const id = await params.id
+    const photoId = parseInt(id)
 
-    const photo = await prisma.photo.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        user: {
-          select: {
-            id: true
-          }
-        }
-      }
-    })
+    await connection.beginTransaction()
 
-    if (!photo) {
+    // Get photo information
+    const [photos] = await connection.query(
+      `SELECT p.*, u.id as userId 
+       FROM Photo p
+       JOIN User u ON p.userId = u.id
+       WHERE p.id = ?`,
+      [photoId]
+    )
+
+    if (photos.length === 0) {
+      await connection.rollback()
       return NextResponse.json(
         { error: 'Photo not found' },
         { status: 404 }
       )
     }
+
+    const photo = photos[0]
 
     const urlParts = photo.url.split('/')
     const key = urlParts.slice(3).join('/')
@@ -42,26 +48,37 @@ export async function DELETE(request, { params }) {
       }))
     } catch (s3Error) {
       console.error('Error deleting from S3:', s3Error)
+      // Continue with database cleanup even if S3 deletion fails
     }
 
-    await prisma.comment.deleteMany({
-      where: { photoId: parseInt(id) }
-    })
+    // Delete related comments
+    await connection.query(
+      'DELETE FROM Comment WHERE photoId = ?',
+      [photoId]
+    )
 
-    await prisma.like.deleteMany({
-      where: { photoId: parseInt(id) }
-    })
+    // Delete related likes
+    await connection.query(
+      'DELETE FROM `Like` WHERE photoId = ?',
+      [photoId]
+    )
 
-    await prisma.photo.delete({
-      where: { id: parseInt(id) }
-    })
+    // Delete the photo
+    await connection.query(
+      'DELETE FROM Photo WHERE id = ?',
+      [photoId]
+    )
 
+    await connection.commit()
     return NextResponse.json({ success: true })
   } catch (error) {
+    await connection.rollback()
     console.error('Error deleting photo:', error)
     return NextResponse.json(
       { error: 'Failed to delete photo' },
       { status: 500 }
     )
+  } finally {
+    connection.release()
   }
 } 
