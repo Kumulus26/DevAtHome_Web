@@ -1,0 +1,148 @@
+📄 Cahier des Charges - Site Kodak - Valorisation de la Photo Argentique
+ 
+ 1. Contexte
+ 
+ La photographie argentique connaît un regain d’intérêt ces dernières années grâce aux réseaux sociaux et aux communautés de passionnés. Kodak souhaite capitaliser sur cet engouement en développant une plateforme web permettant aux utilisateurs de :
+ 	•	Apprendre à développer leurs pellicules chez eux grâce à des guides détaillés.
+ 	•	Partager leurs clichés et échanger avec une communauté de passionnés.
+ 	•	Disposer d’un espace personnel avec profil et feed interactif.
+ 
+ Kodak missionne DevCompany pour la conception et le développement du site.
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 2. Problématique
+ 
+ Le site doit être accessible en ligne et offrir une expérience fluide aux utilisateurs.
+ Pour cela :
+ 	•	Une base de données structurée doit recenser toutes les combinaisons de pellicules et de produits de développement.
+ 	•	Un système de gestion des utilisateurs doit permettre la création de profils, le partage de photos et les interactions (likes, commentaires).
+ 	•	Un espace d’administration avancé (client lourd) doit être mis en place pour la modération des contenus et la gestion de la plateforme.
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 📌 Présentation de Kodak
+ 
+ 3. Kodak : Entre Héritage et Renouveau
+ 
+ 3.1. Historique et Identité de Kodak
+ 
+ Fondée en 1888 par George Eastman, Kodak révolutionne la photographie avec son appareil Kodak Brownie et son slogan emblématique :
+ “You press the button, we do the rest.”
+ 
+ Leader du marché de la pellicule argentique et du cinéma durant le 20ᵉ siècle, Kodak peine à s’adapter au numérique et déclare faillite en 2012. Aujourd’hui, l’entreprise se repositionne sur divers secteurs :
+ ✅ Photographie & Cinéma (films argentiques, solutions d’imagerie)
+ ✅ Impression & Packaging (plaques d’impression écologiques)
+ ✅ Matériaux avancés & Pharma (OLED, composants chimiques)
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 4. Fonctionnalités du Site
+ 
+ 4.1. Inscription et Gestion des Utilisateurs
+ 
+ ✅ Inscription par email / réseaux sociaux
+ ✅ Profil avec avatar, bio et albums
+ ✅ Paramètres et préférences utilisateur
+ 
+ 4.2. Partage et Interaction
+ 
+ ✅ Upload de photos scannées en haute qualité
+ ✅ Création d’albums et de galeries
+ ✅ Système de likes et commentaires
+ 
+ 4.3. Guides et Tutoriels sur le Développement
+ 
+ ✅ Recensement des films & produits chimiques
+ ✅ Explication détaillée des procédés
+ ✅ Matériel et conseils pour débutants
+ 
+ 4.4. Administration et Modération
+ 
+ ✅ Espace de gestion des utilisateurs
+ ✅ Contrôle et validation des publications
+ ✅ Système de signalement et modération
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 5. Architecture et Technologies
+ 
+ 5.1. Architecture du Site
+ 
+ 📂 Base de données : PostgreSQL → Stockage des utilisateurs, images et guides
+ 🖥 Back-end : Node.js / Express → Gestion API et logique métier
+ 🎨 Front-end : React.js → Interface dynamique et responsive
+ ☁ Hébergement : AWS S3 → Stockage sécurisé des images
+ 
+ 5.2. Sécurité et Performances
+ 
+ ✅ Chiffrement des données et conformité RGPD
+ ✅ Compression et optimisation des images
+ ✅ Protection contre les attaques (DDoS, SQL Injection, XSS)
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 6. Design et Ergonomie
+ 
+ 📱 Interface moderne et minimaliste, inspirée du style vintage Kodak
+ 🌙 Mode clair / sombre selon les préférences
+ 📷 Expérience immersive axée sur le visuel et la photographie
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 7. Délais et Phases du Projet
+ 
+ Le projet sera développé en plusieurs étapes, chacune correspondant à un livrable clé :
+ 	•	Étude des besoins : 2 semaines → Cahier des charges validé
+ 	•	Maquettage & Design : 3 semaines → Prototype UX/UI
+ 	•	Développement Back-end : 6 semaines → API et gestion des utilisateurs
+ 	•	Développement Front-end : 6 semaines → Interface utilisateur
+ 	•	Tests & corrections : 3 semaines → Version bêta du site
+ 	•	Lancement & déploiement : 2 semaines → Mise en ligne et ouverture au public
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 8. Budget Estimatif
+ 
+ 💻 Développement : 15 000 – 30 000 €
+ 🎨 Design UX/UI : 5 000 – 10 000 €
+ ☁ Hébergement & maintenance : 2 000 – 5 000 €
+ 📢 Marketing & communication : 3 000 – 7 000 €
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 9. Clause sur les Droits de l’Image et le Partage des Photos (Conformité RGPD)
+ 
+ Afin d’assurer la protection des droits d’auteur et des données personnelles, les utilisateurs doivent respecter les règles suivantes avant de partager leurs photos :
+ 
+ 9.1. Respect du Droit d’Auteur
+ 
+ 📌 Les utilisateurs ne peuvent publier que des photos qu’ils ont prises eux-mêmes ou pour lesquelles ils disposent d’une autorisation explicite.
+ 📌 Toute reproduction ou distribution non autorisée est interdite.
+ 
+ 9.2. Droit à l’Image des Personnes
+ 
+ 📌 Si une photo contient des personnes reconnaissables, leur consentement écrit est obligatoire avant publication, conformément au RGPD.
+ 📌 Aucune donnée personnelle identifiable ne doit apparaître sans accord (ex. plaques d’immatriculation, documents visibles).
+ 
+ 9.3. Protection des Données Personnelles
+ 
+ 📌 Les utilisateurs peuvent demander la suppression de leurs contenus à tout moment.
+ 📌 Un système de signalement permet de modérer les contenus inappropriés.
+ 
+ 9.4. Droits d’Utilisation et Modération
+ 
+ 📌 En publiant une photo, l’utilisateur accorde une licence non exclusive permettant son affichage sur la plateforme.
+ 📌 Un système de modération est mis en place pour supprimer les contenus non conformes.
+ 
+ 9.5. Sanctions en Cas de Non-Respect
+ 
+ 📌 Tout non-respect des règles peut entraîner :
+ 	•	La suppression des contenus concernés.
+ 	•	La suspension ou suppression du compte en cas d’infractions répétées.
+ 
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 🔚 Conclusion
+ 
+ Ce projet vise à offrir une plateforme moderne et interactive rassemblant les passionnés de photographie argentique. En valorisant ses produits et son héritage, Kodak renforce sa présence digitale et accompagne les utilisateurs dans leur pratique photographique.
