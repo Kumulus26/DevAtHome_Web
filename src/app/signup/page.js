@@ -19,6 +19,16 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  function isStrongPassword(password) {
+    return (
+      password.length >= 12 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
+    )
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -32,6 +42,14 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    if (!isStrongPassword(formData.password)) {
+      setError(
+        'Password must be at least 12 characters long and include uppercase, lowercase, number, and special character.'
+      )
+      setLoading(false)
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
