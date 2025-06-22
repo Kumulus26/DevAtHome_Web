@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server'
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
+import path from 'path'
+
+export const dynamic = 'force-dynamic' // Force dynamic handling
+
+// Force-load environment variables using an explicit path
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env') })
+
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME
+const REGION = process.env.AWS_REGION
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
+  region: REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -11,74 +20,52 @@ const s3Client = new S3Client({
 })
 
 export async function DELETE(request, { params }) {
-  const connection = await pool.getConnection()
-  
   try {
-    const id = await params.id
-    const photoId = parseInt(id)
+    const photoId = parseInt(params.id)
 
-    await connection.beginTransaction()
-
-    // Get photo information
-    const [photos] = await connection.query(
-      `SELECT p.*, u.id as userId 
-       FROM Photo p
-       JOIN User u ON p.userId = u.id
-       WHERE p.id = ?`,
-      [photoId]
-    )
-
-    if (photos.length === 0) {
-      await connection.rollback()
-      return NextResponse.json(
-        { error: 'Photo not found' },
-        { status: 404 }
-      )
+    if (isNaN(photoId)) {
+      return NextResponse.json({ error: 'Invalid photo ID' }, { status: 400 })
     }
 
-    const photo = photos[0]
+    // Find the photo to get its S3 URL
+    const photo = await prisma.Photo.findUnique({
+      where: { id: photoId },
+    })
 
-    const urlParts = photo.url.split('/')
-    const key = urlParts.slice(3).join('/')
+    if (!photo) {
+      return NextResponse.json({ error: 'Photo not found' }, { status: 404 })
+    }
 
+    // Delete the photo record from the database.
+    // Thanks to `onDelete: Cascade` in our schema, Prisma will automatically
+    // delete all related Likes and Comments in the same transaction.
+    await prisma.Photo.delete({
+      where: { id: photoId },
+    })
+
+    // After successfully deleting from the DB, delete from S3
     try {
-      await s3Client.send(new DeleteObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key
-      }))
+    const urlParts = photo.url.split('/')
+      const key = urlParts.slice(3).join('/') // Extracts the key (e.g., "photos/user/filename.jpg")
+
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: key,
+        })
+      )
     } catch (s3Error) {
-      console.error('Error deleting from S3:', s3Error)
-      // Continue with database cleanup even if S3 deletion fails
+      // Log the S3 error, but don't block the success response
+      // since the photo is already deleted from our database.
+      console.error('Failed to delete object from S3, but DB record was deleted:', s3Error)
     }
 
-    // Delete related comments
-    await connection.query(
-      'DELETE FROM Comment WHERE photoId = ?',
-      [photoId]
-    )
-
-    // Delete related likes
-    await connection.query(
-      'DELETE FROM `Like` WHERE photoId = ?',
-      [photoId]
-    )
-
-    // Delete the photo
-    await connection.query(
-      'DELETE FROM Photo WHERE id = ?',
-      [photoId]
-    )
-
-    await connection.commit()
     return NextResponse.json({ success: true })
   } catch (error) {
-    await connection.rollback()
-    console.error('Error deleting photo:', error)
+    console.error(`Error deleting photo ${params.id}:`, error)
     return NextResponse.json(
       { error: 'Failed to delete photo' },
       { status: 500 }
     )
-  } finally {
-    connection.release()
   }
 } 

@@ -1,70 +1,78 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
+
+// Mapping from friendly names to Prisma model names
+const filmToModelMap = {
+  'Tri-X 400': 'trix400',
+  'T-MAX 400': 'tmax400',
+  'FOMAPAN 400': 'fomapan400',
+  'RPX 400': 'rpx400',
+  'HP5+ 400': 'hp5',
+}
+
+const devToModelMap = {
+  'T-MAX Dev': 'tmaxdev',
+  Rodinal: 'rodinal',
+  'Ilfosol 3': 'ilfosol3',
+  'HC-110': 'hc110',
+  'Ilfotec LC-29': 'ilfoteclc29',
+}
 
 export async function POST(request) {
   try {
     const { film, developer, iso } = await request.json()
 
-    console.log('Received parameters:', { film, developer, iso })
+    const filmModelKey = filmToModelMap[film]
+    const devModelKey = devToModelMap[developer]
 
-    let filmName = ''
-    if (film === 'Tri-X 400') filmName = 'trix'
-    else if (film === 'T-MAX 400') filmName = 'tmax400'
-    else if (film === 'FOMAPAN 400') filmName = 'fomapan400'
-    else if (film === 'RPX 400') filmName = 'rpx400'
-    else if (film === 'HP5+ 400') filmName = 'hp5'
-    else {
-      console.log('Unknown film:', film)
+    if (!filmModelKey || !devModelKey) {
       return NextResponse.json(
-        { error: `Unknown film: ${film}` },
+        { error: 'Unknown film or developer' },
         { status: 400 }
       )
     }
 
-    let devName = ''
-    if (developer === 'T-MAX Dev') devName = 'tmaxdev'
-    else if (developer === 'Rodinal') devName = 'rodinal'
-    else if (developer === 'Ilfosol 3') devName = 'ilfosol3'
-    else if (developer === 'HC-110') devName = 'hc110'
-    else if (developer === 'Ilfotec LC-29') devName = 'ilfoteclc29'
-    else {
-      console.log('Unknown developer:', developer)
+    // Construct the prisma model key, e.g., "trix400rodinal"
+    const modelName = `${filmModelKey}${devModelKey}`
+
+    // Ensure the model exists on the Prisma client before calling it
+    if (!prisma[modelName]) {
+      console.error(`Prisma model not found: ${modelName}`)
       return NextResponse.json(
-        { error: `Unknown developer: ${developer}` },
-        { status: 400 }
-      )
-    }
-
-    const tableName = `${filmName}${devName}`
-    console.log('Looking up table:', tableName)
-
-    // Use backticks around table name to handle special characters
-    const [results] = await pool.query(
-      `SELECT time_35mm, dilution FROM \`${tableName}\` WHERE asa_iso = ?`,
-      [iso]
-    )
-
-    if (results.length === 0) {
-      console.log('No results found for:', { tableName, iso })
-      return NextResponse.json(
-        { error: 'Development time not found' },
+        { error: 'Development combination not supported' },
         { status: 404 }
       )
     }
 
-    const result = results[0]
-    const time = typeof result.time_35mm === 'string' 
+    const result = await prisma[modelName].findFirst({
+      where: {
+        asa_iso: parseInt(iso),
+      },
+      select: {
+        time_35mm: true,
+        dilution: true,
+      },
+    })
+
+    if (!result) {
+      return NextResponse.json(
+        { error: 'Development time not found for the specified ISO' },
+        { status: 404 }
+      )
+    }
+
+    // Ensure time is always returned as a number
+    const time =
+      typeof result.time_35mm === 'string'
       ? parseFloat(result.time_35mm) 
       : Number(result.time_35mm)
 
-    console.log('Found result:', { time, dilution: result.dilution })
     return NextResponse.json({ 
       time,
-      dilution: result.dilution
+      dilution: result.dilution,
     })
-
   } catch (error) {
-    console.error('Detailed error:', error)
+    console.error('Error fetching development time:', error)
     return NextResponse.json(
       { error: 'Error fetching development time' },
       { status: 500 }

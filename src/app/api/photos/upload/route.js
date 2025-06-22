@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
+import path from 'path'
 
-const BUCKET_NAME = 'devathome-photos'
-const REGION = 'eu-west-3'
+// Force-load environment variables using an explicit path
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env') })
+
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME
+const REGION = process.env.AWS_REGION
+
+console.log('UPLOAD ROUTE - BUCKET_NAME:', BUCKET_NAME) // DEBUG
+console.log('UPLOAD ROUTE - REGION:', REGION) // DEBUG
 
 const s3Client = new S3Client({
   region: REGION,
@@ -13,109 +20,69 @@ const s3Client = new S3Client({
   },
 })
 
+console.log('S3 Client Initialized:', s3Client); // <-- ADDING THIS DEBUG LOG
+
 export async function POST(request) {
   try {
     const formData = await request.formData()
     const file = formData.get('file')
-    const username = formData.get('username')
+    const userId = parseInt(formData.get('userId'))
+    const title = formData.get('title')
     const isProfilePicture = formData.get('isProfilePicture') === 'true'
 
-    if (!file || !username) {
+    if (!file || !userId) {
       return NextResponse.json(
-        { error: 'File and username are required' },
+        { error: 'File and user ID are required' },
         { status: 400 }
       )
     }
 
-    // Find user by username
-    const [users] = await pool.query(
-      'SELECT * FROM User WHERE username = ?',
-      [username]
-    )
-
-    if (users.length === 0) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    const user = users[0]
-
     const buffer = Buffer.from(await file.arrayBuffer())
-    const filename = `${username}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`
+    const filename = `photos/${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`
 
     const uploadParams = {
       Bucket: BUCKET_NAME,
       Key: filename,
       Body: buffer,
       ContentType: file.type,
-      ACL: 'public-read',
+      ACL: 'public-read'
     }
 
-    let fileUrl
-    try {
-      await s3Client.send(new PutObjectCommand(uploadParams))
-      console.log('File uploaded successfully to S3')
+    await s3Client.send(new PutObjectCommand(uploadParams))
+    const fileUrl = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${filename}`
 
-      fileUrl = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${filename}`
-      console.log('Generated file URL:', fileUrl)
-    } catch (s3Error) {
-      console.error('S3 upload error:', s3Error)
-      return NextResponse.json(
-        { error: 'Failed to upload to S3', details: s3Error.message },
-        { status: 500 }
-      )
-    }
-
-    try {
-      if (isProfilePicture) {
-        // Update user profile image
-        await pool.query(
-          'UPDATE User SET profileImage = ? WHERE id = ?',
-          [fileUrl, user.id]
-        )
-
-        // Get updated user
-        const [updatedUsers] = await pool.query(
-          'SELECT * FROM User WHERE id = ?',
-          [user.id]
-        )
-
-        return NextResponse.json({
-          success: true,
-          user: updatedUsers[0],
-          imageUrl: fileUrl
+    if (isProfilePicture) {
+      const updatedUser = await prisma.User.update({
+        where: { id: userId },
+        data: { profileImage: fileUrl },
+      })
+      const { password, ...userWithoutPassword } = updatedUser
+      return NextResponse.json({
+        success: true,
+        user: userWithoutPassword,
+        imageUrl: fileUrl,
         })
       } else {
-        // Create new photo
-        const [result] = await pool.query(
-          'INSERT INTO Photo (url, userId, likes, commentsCount) VALUES (?, ?, ?, ?)',
-          [fileUrl, user.id, 0, 0]
-        )
-
-        // Get the created photo
-        const [photos] = await pool.query(
-          'SELECT * FROM Photo WHERE id = ?',
-          [result.insertId]
-        )
+      const newPhoto = await prisma.Photo.create({
+        data: {
+          url: fileUrl,
+          title: title || 'Untitled',
+          userId: userId,
+        },
+        include: {
+          user: true,
+        },
+      })
 
         return NextResponse.json({
           success: true,
-          photo: photos[0]
+        photo: newPhoto,
         })
-      }
-    } catch (dbError) {
-      console.error('Database error:', dbError)
-      return NextResponse.json(
-        { error: 'Failed to save to database', details: dbError.message },
-        { status: 500 }
-      )
     }
   } catch (error) {
-    console.error('General error:', error)
+    console.error('Upload error:', error)
     return NextResponse.json(
-      { error: 'Failed to process request', details: error.message },
+      { error: 'Failed to process upload', details: error.message },
       { status: 500 }
     )
   }

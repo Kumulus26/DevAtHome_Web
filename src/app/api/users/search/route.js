@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
 export async function GET(request) {
   try {
@@ -13,19 +13,23 @@ export async function GET(request) {
       )
     }
 
-    // Search for users with LIKE operator
-    const searchTerm = `%${query}%`
-    const [users] = await pool.query(
-      `SELECT 
-        id, username, firstName, lastName, profileImage
-      FROM User
-      WHERE 
-        username LIKE ? OR 
-        firstName LIKE ? OR 
-        lastName LIKE ?
-      LIMIT 10`,
-      [searchTerm, searchTerm, searchTerm]
-    )
+    const users = await prisma.User.findMany({
+      where: {
+        OR: [
+          { username: { contains: query, mode: 'insensitive' } },
+          { firstName: { contains: query, mode: 'insensitive' } },
+          { lastName: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      take: 10,
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        profileImage: true,
+      },
+    })
 
     return NextResponse.json({ users })
   } catch (error) {

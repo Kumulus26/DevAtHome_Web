@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -68,7 +68,7 @@ model hp5hc110 {
 }
 
 model hp5ilfosol3 {
-  id        Int      @id @default(autoincrement())
+  id        Int      @id(map: "hp5ilfosol3_data_pkey") @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)
@@ -138,7 +138,7 @@ model tmax400rodinal {
 }
 
 model tmax400tmaxdev {
-  id        Int      @id @default(autoincrement())
+  id        Int      @id(map: "tmaxtmaxdev_pkey") @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)
@@ -148,33 +148,33 @@ model tmax400tmaxdev {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  firstName     String    @db.VarChar(100)
-  lastName      String    @db.VarChar(100)
-  email         String    @unique @db.VarChar(255)
-  dateOfBirth   DateTime  @db.Date
-  password      String    @db.VarChar(255)
-  createdAt     DateTime? @default(now()) @db.Timestamp(6)
-  role          Role?     @default(USER)
-  username      String    @unique @db.VarChar(100)
-  bio           String?   @db.Text
-  profileImage  String?   @db.Text
-  photos        Photo[]
-  likes         Like[]
-  comments      Comment[]
+  id           Int       @id @default(autoincrement())
+  firstName    String    @db.VarChar(100)
+  lastName     String    @db.VarChar(100)
+  email        String    @unique @db.VarChar(255)
+  dateOfBirth  DateTime  @db.Date
+  password     String    @db.VarChar(255)
+  createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  role         Role?     @default(USER)
+  username     String    @unique @db.VarChar(100)
+  bio          String?
+  profileImage String?
+  comments     Comment[]
+  likes        Like[]
+  photos       Photo[]
 }
 
 model Photo {
-  id        Int      @id @default(autoincrement())
-  url       String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  title     String?
-  likes     Int      @default(0)
-  commentsCount Int  @default(0) @map("comments")
-  likedBy   Like[]
-  comments  Comment[]
+  id            Int       @id @default(autoincrement())
+  url           String
+  userId        Int
+  createdAt     DateTime  @default(now())
+  title         String?
+  likes         Int       @default(0)
+  commentsCount Int       @default(0) @map("comments")
+  comments      Comment[]
+  likedBy       Like[]
+  user          User      @relation(fields: [userId], references: [id])
 }
 
 model Comment {
@@ -183,8 +183,8 @@ model Comment {
   userId    Int
   photoId   Int
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
   photo     Photo    @relation(fields: [photoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Like {
@@ -192,8 +192,8 @@ model Like {
   userId    Int
   photoId   Int
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
   photo     Photo    @relation(fields: [photoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, photoId])
 }
@@ -239,7 +239,7 @@ model rpx400tmaxdev {
 }
 
 model tmax400ilfoteclc29 {
-  id        Int      @id @default(autoincrement())
+  id        Int      @id(map: "tmaxilfoteclc29_pkey") @default(autoincrement())
   film      String?  @db.VarChar(50)
   developer String?  @db.VarChar(50)
   dilution  String?  @db.VarChar(10)

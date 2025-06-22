@@ -1,60 +1,66 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
-export async function GET(request, context) {
+export async function GET(request, { params }) {
   try {
-    const params = await context.params
-    const username = params.username
+    const username = params.username;
 
-    // Get user information
-    const [users] = await pool.query(
-      'SELECT * FROM User WHERE username = ?',
-      [username]
-    )
+    const user = await prisma.User.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        dateOfBirth: true,
+        createdAt: true,
+        role: true,
+        username: true,
+        bio: true,
+        profileImage: true,
+        photos: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        _count: {
+          select: {
+            photos: true, // Counts the number of photos
+          },
+        },
+      },
+    })
 
-    if (users.length === 0) {
+    if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       )
     }
 
-    const user = users[0]
-
-    // Get user's photos
-    const [photos] = await pool.query(
-      `SELECT 
-        p.id, p.url, p.title, p.createdAt, p.likes, p.commentsCount
-      FROM Photo p
-      WHERE p.userId = ?
-      ORDER BY p.createdAt DESC`,
-      [user.id]
-    )
-
-    // Calculate stats
-    const totalLikes = photos.reduce((sum, photo) => sum + photo.likes, 0)
-    const totalComments = photos.reduce((sum, photo) => sum + photo.commentsCount, 0)
-    const totalPhotos = photos.length
-
-    // Remove password from user object
-    const { password, ...userWithoutPassword } = user
+    // Calculate total likes and comments from the fetched photos
+    const totalLikes = user.photos.reduce((sum, photo) => sum + photo.likes, 0)
+    const totalComments = user.photos.reduce((sum, photo) => sum + photo.commentsCount, 0)
 
     const response = {
-      ...userWithoutPassword,
-      photos,
+      ...user,
       stats: {
-        totalPhotos,
+        totalPhotos: user._count.photos,
         totalLikes,
-        totalComments
-      }
+        totalComments,
+      },
     }
+    // Remove the _count field from the final response
+    delete response._count
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Profile fetch error:', error)
+    console.error(`Error fetching profile for ${params.username}:`, error)
     return NextResponse.json(
       { error: 'Failed to fetch profile' },
       { status: 500 }
     )
   }
 } 
+
+export const dynamic = 'force-dynamic'; 

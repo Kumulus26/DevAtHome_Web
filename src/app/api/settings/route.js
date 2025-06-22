@@ -1,113 +1,80 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
+// Update user settings
 export async function PUT(request) {
-  const connection = await pool.getConnection()
-  
   try {
-    const { userId, firstName, lastName, username, currentPassword, newPassword } = await request.json()
+    const { userId, firstName, lastName, username, currentPassword, newPassword } =
+      await request.json()
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    await connection.beginTransaction()
+    const dataToUpdate = {}
 
-    // Get current user
-    const [users] = await connection.query(
-      'SELECT * FROM User WHERE id = ?',
-      [userId]
-    )
-
-    if (users.length === 0) {
-      await connection.rollback()
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    const user = users[0]
-
-    // Check if username is taken by another user
-    if (username && username !== user.username) {
-      const [existingUsers] = await connection.query(
-        'SELECT id FROM User WHERE username = ? AND id != ?',
-        [username, userId]
-      )
-      
-      if (existingUsers.length > 0) {
-        await connection.rollback()
-        return NextResponse.json({ error: 'Username already taken' }, { status: 400 })
-      }
-    }
-
-    // Build update query
-    let updateFields = []
-    let updateValues = []
-
-    if (firstName) {
-      updateFields.push('firstName = ?')
-      updateValues.push(firstName)
-    }
-    if (lastName) {
-      updateFields.push('lastName = ?')
-      updateValues.push(lastName)
-    }
-    if (username) {
-      updateFields.push('username = ?')
-      updateValues.push(username)
-    }
+    if (firstName) dataToUpdate.firstName = firstName
+    if (lastName) dataToUpdate.lastName = lastName
+    if (username) dataToUpdate.username = username
 
     // Handle password update
     if (currentPassword && newPassword) {
+      const user = await prisma.User.findUnique({ where: { id: userId } })
+      if (!user) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      }
+
       const isValidPassword = await bcrypt.compare(currentPassword, user.password)
       if (!isValidPassword) {
-        await connection.rollback()
-        return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Current password is incorrect' },
+          { status: 400 }
+        )
       }
-      const hashedPassword = await bcrypt.hash(newPassword, 10)
-      updateFields.push('password = ?')
-      updateValues.push(hashedPassword)
+      dataToUpdate.password = await bcrypt.hash(newPassword, 10)
     }
 
-    if (updateFields.length > 0) {
-      // Add userId to values array for WHERE clause
-      updateValues.push(userId)
-      
-      // Execute update query
-      await connection.query(
-        `UPDATE User SET ${updateFields.join(', ')} WHERE id = ?`,
-        updateValues
+    if (Object.keys(dataToUpdate).length === 0) {
+      return NextResponse.json(
+        { message: 'No changes to apply' },
+        { status: 200 }
       )
     }
 
-    // Get updated user
-    const [updatedUsers] = await connection.query(
-      'SELECT id, firstName, lastName, email, username FROM User WHERE id = ?',
-      [userId]
-    )
-
-    await connection.commit()
+    const updatedUser = await prisma.User.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        username: true,
+      },
+    })
 
     return NextResponse.json({
       message: 'Settings updated successfully',
-      user: updatedUsers[0]
+      user: updatedUser,
     })
-
   } catch (error) {
-    await connection.rollback()
+    if (error.code === 'P2002' && error.meta?.target?.includes('username')) {
+      return NextResponse.json(
+        { error: 'Username already taken' },
+        { status: 400 }
+      )
+    }
     console.error('Settings update error:', error)
     return NextResponse.json(
       { error: 'Error updating settings' },
       { status: 500 }
     )
-  } finally {
-    connection.release()
   }
 }
 
+// Delete user account
 export async function DELETE(request) {
-  const connection = await pool.getConnection()
-  
   try {
     const { userId } = await request.json()
 
@@ -115,31 +82,22 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    await connection.beginTransaction()
+    // Prisma's cascaded delete (configured in schema.prisma) will handle deleting
+    // all related photos, comments, and likes automatically and atomically.
+    await prisma.User.delete({
+      where: { id: userId },
+    })
 
-    // Delete user's comments
-    await connection.query('DELETE FROM Comment WHERE userId = ?', [userId])
-
-    // Delete user's likes
-    await connection.query('DELETE FROM `Like` WHERE userId = ?', [userId])
-
-    // Delete user's photos
-    await connection.query('DELETE FROM Photo WHERE userId = ?', [userId])
-
-    // Finally, delete the user
-    await connection.query('DELETE FROM User WHERE id = ?', [userId])
-
-    await connection.commit()
     return NextResponse.json({ message: 'Account deleted successfully' })
-
   } catch (error) {
-    await connection.rollback()
+    // P2025 is the error code for "Record to delete does not exist."
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
     console.error('Account deletion error:', error)
     return NextResponse.json(
       { error: 'Error deleting account' },
       { status: 500 }
     )
-  } finally {
-    connection.release()
   }
 } 

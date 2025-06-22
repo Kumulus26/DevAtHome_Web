@@ -82,7 +82,7 @@ export default function Profile({ params }) {
 
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('username', user.username)
+    formData.append('userId', user.id)
     formData.append('isProfilePicture', 'true')
 
     try {
@@ -175,11 +175,13 @@ export default function Profile({ params }) {
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0]
+    const title = prompt('Enter a title for your photo:', 'Untitled')
     if (!file) return
 
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('username', user.username)
+    formData.append('userId', user.id)
+    formData.append('title', title || 'Untitled')
     formData.append('isProfilePicture', 'false')
 
     try {
@@ -265,7 +267,7 @@ export default function Profile({ params }) {
       )
     }
 
-    const validPhotos = photos.filter(photo => photo && photo.url && photo.id);
+    const validPhotos = photos.filter(photo => typeof photo?.url === 'string' && photo.url.startsWith('http'));
 
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2">
@@ -424,24 +426,18 @@ export default function Profile({ params }) {
                 <div className="relative group mb-4 sm:mb-6">
                   <div className="w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden ring-4 ring-white/10 bg-gray-800">
                     <div className="w-full h-full relative">
-                      {user?.profileImage ? (
-                        <img 
-                          src={user.profileImage} 
+                      <Image 
+                        src={user?.profileImage || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} 
                           alt={`${user.username}'s profile`} 
-                          className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 640px) 112px, 160px"
+                        className="object-cover"
                           onError={(e) => {
                             console.error('Image load error:', e);
                             e.target.onerror = null;
                             e.target.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
                           }}
                         />
-                      ) : (
-                        <img 
-                          src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                          alt="Default profile"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
                     </div>
                   </div>
                   {isOwnProfile && (

@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import pool from '@/lib/db';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log('Received request body:', body);
-
     const { firstName, lastName, email, dateOfBirth, password, username } = body;
 
     if (!firstName || !lastName || !email || !dateOfBirth || !password || !username) {
@@ -16,58 +14,32 @@ export async function POST(request) {
       );
     }
 
-    console.log('Creating user with data:', {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
       firstName,
       lastName,
       email,
-      dateOfBirth,
-      username
+        dateOfBirth: new Date(dateOfBirth),
+        password: hashedPassword,
+        username,
+        role: 'USER',
+      },
     });
 
-    // Check if email or username already exists
-    const [existingUsers] = await pool.query(
-      'SELECT * FROM User WHERE email = ? OR username = ?',
-      [email, username]
-    );
-
-    if (existingUsers.length > 0) {
-      return NextResponse.json(
-        { error: 'This email or username is already taken' },
-        { status: 400 }
-      );
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const formattedDate = new Date(dateOfBirth).toISOString().split('T')[0];
-
-    // Insert the new user
-    const [result] = await pool.query(
-      'INSERT INTO User (firstName, lastName, email, dateOfBirth, password, username, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [firstName, lastName, email, formattedDate, hashedPassword, username, 1] // 1 is the role ID for USER
-    );
-
-    console.log('User created successfully:', result.insertId);
-
-    // Get the created user
-    const [users] = await pool.query(
-      'SELECT id, firstName, lastName, email, dateOfBirth, username, role, createdAt FROM User WHERE id = ?',
-      [result.insertId]
-    );
-
-    const user = users[0];
+    // eslint-disable-next-line no-unused-vars
+    const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(
-      { message: 'Account created successfully', user },
+      { message: 'Account created successfully', user: userWithoutPassword },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Detailed error:', {
-      message: error.message,
-      stack: error.stack
-    });
+    console.error('Detailed error:', error);
 
-    // Check for duplicate entry error
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 'P2002') {
+      // Unique constraint violation (email or username is already taken)
       return NextResponse.json(
         { error: 'This email or username is already taken' },
         { status: 400 }
@@ -78,7 +50,6 @@ export async function POST(request) {
       { 
         error: 'Error creating account',
         details: error.message,
-        code: error.code
       }, 
       { status: 500 }
     );

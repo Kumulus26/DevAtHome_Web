@@ -55,7 +55,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
       localStorage.removeItem('user')
       setUser(null)
       setShowDropdown(false)
-      window.location.reload()
+      router.push('/')
     } catch (error) {
       console.error('Error during logout:', error)
     }

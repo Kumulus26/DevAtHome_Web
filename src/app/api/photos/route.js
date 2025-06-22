@@ -1,49 +1,46 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
-    // Get all photos with user information
-    const [photos] = await pool.query(`
-      SELECT 
-        p.id, p.url, p.title, p.likes, p.commentsCount, p.createdAt,
-        u.id as userId, u.username, u.profileImage
-      FROM Photo p
-      JOIN User u ON p.userId = u.id
-      ORDER BY p.createdAt DESC
-    `);
-
-    // Format the results
-    const formattedPhotos = await Promise.all(photos.map(async (photo) => {
-      let isLiked = false;
-      
-      // Check if the photo is liked by the user
-      if (userId) {
-        const [likes] = await pool.query(
-          'SELECT * FROM `Like` WHERE photoId = ? AND userId = ?',
-          [photo.id, parseInt(userId)]
-        );
-        isLiked = likes.length > 0;
-      }
-
-      return {
-        id: photo.id,
-        url: photo.url,
-        title: photo.title,
-        likes: photo.likes,
-        commentsCount: photo.commentsCount,
-        createdAt: photo.createdAt,
+    const photos = await prisma.Photo.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
         user: {
-          id: photo.userId,
-          username: photo.username,
-          profileImage: photo.profileImage
+          select: {
+            id: true,
+            username: true,
+            profileImage: true,
+          },
         },
-        isLiked
-      };
-    }));
+        // If a userId is provided, check if that user has liked the photo
+        likedBy: userId
+          ? {
+              where: {
+                userId: parseInt(userId),
+              },
+              select: {
+                userId: true, // We only need to know if a record exists
+              },
+            }
+          : false, // Do not include likedBy if no userId is given
+      },
+    })
+
+    // Format the photos to include an `isLiked` boolean
+    const formattedPhotos = photos.map((photo) => {
+      const { likedBy, ...rest } = photo
+      return {
+        ...rest,
+        // The photo is liked if the likedBy array has one or more items
+        isLiked: likedBy ? likedBy.length > 0 : false,
+      }
+    })
 
     return NextResponse.json(formattedPhotos)
   } catch (error) {

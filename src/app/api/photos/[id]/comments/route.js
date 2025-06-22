@@ -1,32 +1,31 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
+// Get all comments for a photo
 export async function GET(request, { params }) {
   try {
-    const id = await params.id
-    const photoId = parseInt(id)
+    const photoId = parseInt(params.id)
+    if (isNaN(photoId)) {
+      return NextResponse.json({ error: 'Invalid photo ID' }, { status: 400 })
+    }
 
-    const [comments] = await pool.query(`
-      SELECT 
-        Comment.id,
-        Comment.content,
-        Comment.createdAt,
-        Comment.userId,
-        Comment.photoId,
-        JSON_OBJECT(
-          'id', User.id,
-          'username', User.username,
-          'profileImage', User.profileImage
-        ) as user
-      FROM Comment 
-      JOIN User ON Comment.userId = User.id
-      WHERE Comment.photoId = ?
-      ORDER BY Comment.createdAt DESC
-    `, [photoId])
+    const comments = await prisma.Comment.findMany({
+      where: { photoId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profileImage: true,
+          },
+        },
+      },
+    })
 
     return NextResponse.json(comments)
   } catch (error) {
-    console.error('Error fetching comments:', error)
+    console.error(`Error fetching comments for photo ${params.id}:`, error)
     return NextResponse.json(
       { error: 'Error fetching comments' },
       { status: 500 }
@@ -34,112 +33,102 @@ export async function GET(request, { params }) {
   }
 }
 
+// Add a new comment to a photo
 export async function POST(request, { params }) {
-  const connection = await pool.getConnection()
-  
   try {
-    const id = await params.id
-    const photoId = parseInt(id)
+    const photoId = parseInt(params.id)
     const { content, userId } = await request.json()
 
-    if (!content || !userId) {
+    if (isNaN(photoId) || !content || !userId) {
       return NextResponse.json(
-        { error: 'Content and userId are required' },
+        { error: 'Missing required fields' },
         { status: 400 }
       )
     }
 
-    await connection.beginTransaction()
+    // Use a transaction to create the comment and update the photo's comment count
+    const [, newComment] = await prisma.$transaction([
+      prisma.Photo.update({
+        where: { id: photoId },
+        data: { commentsCount: { increment: 1 } },
+      }),
+      prisma.Comment.create({
+        data: {
+          content,
+          userId,
+          photoId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              profileImage: true,
+            },
+          },
+        },
+      }),
+    ])
 
-    const [result] = await connection.query(
-      'INSERT INTO Comment (content, userId, photoId) VALUES (?, ?, ?)',
-      [content, userId, photoId]
-    )
-
-    // Update comments count
-    await connection.query(
-      'UPDATE Photo SET commentsCount = commentsCount + 1 WHERE id = ?',
-      [photoId]
-    )
-
-    // Fetch the newly created comment with user details
-    const [newComment] = await connection.query(`
-      SELECT 
-        Comment.id,
-        Comment.content,
-        Comment.createdAt,
-        Comment.userId,
-        Comment.photoId,
-        JSON_OBJECT(
-          'id', User.id,
-          'username', User.username,
-          'profileImage', User.profileImage
-        ) as user
-      FROM Comment 
-      JOIN User ON Comment.userId = User.id
-      WHERE Comment.id = ?
-    `, [result.insertId])
-
-    await connection.commit()
-    return NextResponse.json(newComment[0])
+    return NextResponse.json(newComment)
   } catch (error) {
-    await connection.rollback()
-    console.error('Error creating comment:', error)
+    console.error(`Error creating comment for photo ${params.id}:`, error)
     return NextResponse.json(
       { error: 'Error creating comment' },
       { status: 500 }
     )
-  } finally {
-    connection.release()
   }
 }
 
+// Delete a comment
 export async function DELETE(request, { params }) {
-  const connection = await pool.getConnection()
-  
   try {
-    const id = await params.id
+    const photoId = parseInt(params.id)
     const { commentId, userId } = await request.json()
 
-    if (!commentId || !userId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (isNaN(photoId) || !commentId || !userId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
     }
 
-    await connection.beginTransaction()
+    // Fetch the comment and the related photo to check for ownership
+    const comment = await prisma.Comment.findUnique({
+      where: { id: commentId },
+      include: { photo: true },
+    })
 
-    const [comment] = await connection.query(`
-      SELECT * FROM Comment WHERE id = ?
-    `, [commentId])
-
-    if (comment.length === 0) {
-      await connection.rollback()
+    if (!comment) {
       return NextResponse.json({ error: 'Comment not found' }, { status: 404 })
     }
 
-    const [photo] = await connection.query(`
-      SELECT userId FROM Photo WHERE id = ?
-    `, [id])
+    // Check if the user is authorized to delete the comment
+    // (either the comment author or the photo owner)
+    const isCommentAuthor = comment.userId === userId
+    const isPhotoOwner = comment.photo.userId === userId
 
-    if (photo.length === 0) {
-      await connection.rollback()
-      return NextResponse.json({ error: 'Photo not found' }, { status: 404 })
-    }
-
-    if (comment[0].userId !== parseInt(userId) && photo[0].userId !== parseInt(userId)) {
-      await connection.rollback()
+    if (!isCommentAuthor && !isPhotoOwner) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    await connection.query('DELETE FROM Comment WHERE id = ?', [commentId])
-    await connection.query('UPDATE Photo SET commentsCount = commentsCount - 1 WHERE id = ?', [id])
+    // Use a transaction to delete the comment and decrement the photo's comment count
+    await prisma.$transaction([
+      prisma.Comment.delete({
+        where: { id: commentId },
+      }),
+      prisma.Photo.update({
+        where: { id: photoId },
+        data: { commentsCount: { decrement: 1 } },
+      }),
+    ])
 
-    await connection.commit()
     return NextResponse.json({ success: true })
   } catch (error) {
-    await connection.rollback()
-    console.error('Error deleting comment:', error)
-    return NextResponse.json({ error: 'Failed to delete comment' }, { status: 500 })
-  } finally {
-    connection.release()
+    console.error(`Error deleting comment for photo ${params.id}:`, error)
+    return NextResponse.json(
+      { error: 'Failed to delete comment' },
+      { status: 500 }
+    )
   }
 } 

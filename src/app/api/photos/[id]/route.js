@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
-export async function GET(request, context) {
+export async function GET(request, { params }) {
   try {
-    const params = await context.params
     const photoId = parseInt(params.id)
-    
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
@@ -16,56 +14,42 @@ export async function GET(request, context) {
       )
     }
 
-    // Get photo with user information
-    const [photos] = await pool.query(
-      `SELECT 
-        p.id, p.url, p.title, p.likes, p.commentsCount, p.createdAt,
-        u.id as userId, u.username, u.profileImage
-      FROM Photo p
-      JOIN User u ON p.userId = u.id
-      WHERE p.id = ?`,
-      [photoId]
-    )
+    const photo = await prisma.Photo.findUnique({
+      where: { id: photoId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profileImage: true,
+          },
+        },
+        likedBy: userId
+          ? {
+              where: {
+                userId: parseInt(userId),
+              },
+              select: {
+                userId: true,
+              },
+            }
+          : false,
+      },
+    })
 
-    if (photos.length === 0) {
+    if (!photo) {
       return NextResponse.json(
         { error: 'Photo not found' },
         { status: 404 }
       )
     }
 
-    const photo = photos[0]
-    
-    // Check if the photo is liked by the user
-    let isLiked = false
-    if (userId) {
-      const [likes] = await pool.query(
-        'SELECT * FROM `Like` WHERE photoId = ? AND userId = ?',
-        [photoId, parseInt(userId)]
-      )
-      isLiked = likes.length > 0
-    }
+    const { likedBy, ...rest } = photo
+    const isLiked = likedBy ? likedBy.length > 0 : false
 
-    // Format the response
-    const response = {
-      id: photo.id,
-      url: photo.url,
-      title: photo.title,
-      likes: photo.likes,
-      commentsCount: photo.commentsCount,
-      createdAt: photo.createdAt,
-      user: {
-        id: photo.userId,
-        username: photo.username,
-        profileImage: photo.profileImage
-      },
-      isLiked
-    }
-
-    return NextResponse.json(response)
-
+    return NextResponse.json({ ...rest, isLiked })
   } catch (error) {
-    console.error('Error fetching photo:', error)
+    console.error(`Error fetching photo ${params.id}:`, error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,31 +1,37 @@
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import prisma from '@/lib/prisma'
 
 export async function PUT(request) {
   try {
     const { username, bio } = await request.json()
 
-    // Update user bio
-    await pool.query(
-      'UPDATE User SET bio = ? WHERE username = ?',
-      [bio, username]
-    )
-
-    // Get updated user
-    const [users] = await pool.query(
-      'SELECT id, username, firstName, lastName, bio, profileImage, email FROM User WHERE username = ?',
-      [username]
-    )
-
-    if (users.length === 0) {
+    if (!username) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Username is required' },
+        { status: 400 }
       )
     }
 
-    return NextResponse.json(users[0])
+    const updatedUser = await prisma.User.update({
+      where: { username },
+      data: { bio },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        bio: true,
+        profileImage: true,
+        email: true,
+      },
+    })
+
+    return NextResponse.json(updatedUser)
   } catch (error) {
+    // P2025 is the error code for "Record to update does not exist."
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
     console.error('Profile update error:', error)
     return NextResponse.json(
       { error: 'Failed to update profile' },
