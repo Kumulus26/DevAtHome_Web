@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function SignUp({ isModal = false, onClose, onLoginClick }) {
   const router = useRouter()
@@ -15,9 +15,21 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
     password: '',
     confirmPassword: '',
     dateOfBirth: '',
+    question1_id: '',
+    question2_id: '',
+    answer1: '',
+    answer2: '',
   })
+  const [questions, setQuestions] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/secret-questions')
+      .then(res => res.json())
+      .then(setQuestions)
+      .catch(() => setQuestions([]))
+  }, [])
 
   function isStrongPassword(password) {
     return (
@@ -42,6 +54,18 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    // Frontend validation for secret questions
+    if (!formData.question1_id || !formData.question2_id || !formData.answer1 || !formData.answer2) {
+      setError('Please select two different secret questions and provide answers to both.')
+      setLoading(false)
+      return
+    }
+    if (formData.question1_id === formData.question2_id) {
+      setError('Secret questions must be different.')
+      setLoading(false)
+      return
+    }
 
     if (!isStrongPassword(formData.password)) {
       setError(
@@ -182,7 +206,9 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
                 required
                 className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:border-white focus:ring-1 focus:ring-white transition-colors"
               />
-              
+              <div className="text-xs text-zinc-400 mt-1">
+                Password must be at least 12 characters, include uppercase, lowercase, number, and special character.
+              </div>
               <button
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2"
@@ -214,6 +240,66 @@ export default function SignUp({ isModal = false, onClose, onLoginClick }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </button>
+            </div>
+
+            {/* Secret Questions */}
+            <div>
+              <label className="block text-zinc-400 mb-1">Secret Question 1</label>
+              <select
+                name="question1_id"
+                value={formData.question1_id}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white mb-2"
+              >
+                <option value="">Select a question</option>
+                {questions.map(q => (
+                  <option
+                    key={q.id}
+                    value={q.id}
+                    disabled={formData.question2_id && q.id === Number(formData.question2_id)}
+                  >
+                    {q.question}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="answer1"
+                placeholder="Answer to question 1"
+                value={formData.answer1}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 mb-4"
+              />
+              <label className="block text-zinc-400 mb-1">Secret Question 2</label>
+              <select
+                name="question2_id"
+                value={formData.question2_id}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white mb-2"
+              >
+                <option value="">Select a different question</option>
+                {questions.map(q => (
+                  <option
+                    key={q.id}
+                    value={q.id}
+                    disabled={formData.question1_id && q.id === Number(formData.question1_id)}
+                  >
+                    {q.question}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="answer2"
+                placeholder="Answer to question 2"
+                value={formData.answer2}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400"
+              />
             </div>
 
             <button

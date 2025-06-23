@@ -5,26 +5,39 @@ import bcrypt from 'bcryptjs';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, dateOfBirth, password, username } = body;
+    const { firstName, lastName, email, dateOfBirth, password, username, question1_id, question2_id, answer1, answer2 } = body;
 
-    if (!firstName || !lastName || !email || !dateOfBirth || !password || !username) {
+    if (!firstName || !lastName || !email || !dateOfBirth || !password || !username || !question1_id || !question2_id || !answer1 || !answer2) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (question1_id === question2_id) {
+      return NextResponse.json(
+        { error: 'Secret questions must be different' },
+        { status: 400 }
+      );
+    }
 
-    const user = await prisma.user.create({
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedAnswer1 = await bcrypt.hash(answer1, 10);
+    const hashedAnswer2 = await bcrypt.hash(answer2, 10);
+
+    const user = await prisma.User.create({
       data: {
-      firstName,
-      lastName,
-      email,
+        firstName,
+        lastName,
+        email,
         dateOfBirth: new Date(dateOfBirth),
         password: hashedPassword,
         username,
         role: 'USER',
+        question1_id: Number(question1_id),
+        question2_id: Number(question2_id),
+        answer1: hashedAnswer1,
+        answer2: hashedAnswer2,
       },
     });
 

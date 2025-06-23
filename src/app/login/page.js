@@ -146,6 +146,16 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
               </button>
             </div>
 
+            <div className="text-right mb-2">
+              <button
+                type="button"
+                className="text-blue-400 hover:underline text-sm"
+                onClick={() => router.push('/forgot-password')}
+              >
+                Forgot password?
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={loading}

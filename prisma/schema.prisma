@@ -148,20 +148,26 @@ model tmax400tmaxdev {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  firstName    String    @db.VarChar(100)
-  lastName     String    @db.VarChar(100)
-  email        String    @unique @db.VarChar(255)
-  dateOfBirth  DateTime  @db.Date
-  password     String    @db.VarChar(255)
-  createdAt    DateTime? @default(now()) @db.Timestamp(6)
-  role         Role?     @default(USER)
-  username     String    @unique @db.VarChar(100)
-  bio          String?
-  profileImage String?
-  comments     Comment[]
-  likes        Like[]
-  photos       Photo[]
+  id                                                   Int               @id @default(autoincrement())
+  firstName                                            String            @db.VarChar(100)
+  lastName                                             String            @db.VarChar(100)
+  email                                                String            @unique @db.VarChar(255)
+  dateOfBirth                                          DateTime          @db.Date
+  password                                             String            @db.VarChar(255)
+  createdAt                                            DateTime?         @default(now()) @db.Timestamp(6)
+  role                                                 Role?             @default(USER)
+  username                                             String            @unique @db.VarChar(100)
+  bio                                                  String?
+  profileImage                                         String?
+  question1_id                                         Int?
+  answer1                                              String?
+  question2_id                                         Int?
+  answer2                                              String?
+  comments                                             Comment[]
+  likes                                                Like[]
+  photos                                               Photo[]
+  secret_questions_User_question1_idTosecret_questions secret_questions? @relation("User_question1_idTosecret_questions", fields: [question1_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  secret_questions_User_question2_idTosecret_questions secret_questions? @relation("User_question2_idTosecret_questions", fields: [question2_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Photo {
@@ -296,6 +302,13 @@ model trix400tmaxdev {
   asa_iso     Int
   time_35mm   String @db.VarChar(20)
   temperature String @db.VarChar(10)
+}
+
+model secret_questions {
+  id                                       Int    @id @default(autoincrement())
+  question                                 String
+  User_User_question1_idTosecret_questions User[] @relation("User_question1_idTosecret_questions")
+  User_User_question2_idTosecret_questions User[] @relation("User_question2_idTosecret_questions")
 }
 
 enum Role {
