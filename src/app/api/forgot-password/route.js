@@ -22,6 +22,7 @@ export async function POST(request) {
       questions: [user.secret_questions_User_question1_idTosecret_questions, user.secret_questions_User_question2_idTosecret_questions],
     });
   } catch (error) {
+    console.error('Forgot password POST error:', error);
     return NextResponse.json({ error: 'Error fetching questions' }, { status: 500 });
   }
 }
