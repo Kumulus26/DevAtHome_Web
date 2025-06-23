@@ -311,6 +311,16 @@ model secret_questions {
   User_User_question2_idTosecret_questions User[] @relation("User_question2_idTosecret_questions")
 }
 
+model login_attempts {
+  id          Int       @id @default(autoincrement())
+  email       String
+  ip_address  String    @db.Inet
+  user_agent  String?
+  success     Boolean   @default(false)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  block_until DateTime? @db.Timestamptz(6)
+}
+
 enum Role {
   USER
   ADMIN
