@@ -1,5 +1,6 @@
 'use client'
 
+// imports
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -8,7 +9,9 @@ import Login from '../login/page'
 import SignUp from '../signup/page'
 import Background from '@/components/Background'
 
+// page tableau de choix
 export default function Tableau() {
+  // hooks et états
   const router = useRouter()
   const [selectedFilm, setSelectedFilm] = useState('')
   const [selectedDeveloper, setSelectedDeveloper] = useState('')
@@ -18,6 +21,7 @@ export default function Tableau() {
   const [showLoader, setShowLoader] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
 
+  // films disponibles
   const films = [
     {
       id: 'hp5-400',
@@ -51,6 +55,7 @@ export default function Tableau() {
     }
   ]
 
+  // révélateurs disponibles
   const developers = [
     {
       id: 'ilfosol3',
@@ -84,6 +89,7 @@ export default function Tableau() {
     }
   ]
 
+  // effet d'apparition question
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowQuestion(true)
@@ -91,31 +97,37 @@ export default function Tableau() {
     return () => clearTimeout(timer)
   }, [])
 
+  // récupère le thème
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
     setIsDarkMode(savedTheme === 'dark' || savedTheme === null)
   }, [])
 
+  // ouvre la modale login
   const handleLoginClick = () => {
     setShowSignUp(false)
     setShowLogin(true)
   }
 
+  // ouvre la modale signup
   const handleSignUpClick = () => {
     setShowLogin(false)
     setShowSignUp(true)
   }
 
+  // ferme les modales
   const handleCloseModals = () => {
     setShowLogin(false)
     setShowSignUp(false)
   }
 
+  // sélection film
   const handleFilmSelect = (filmId) => {
     setSelectedFilm(filmId)
     setSelectedDeveloper('')
   }
 
+  // sélection révélateur
   const handleDeveloperSelect = (developerId) => {
     setSelectedDeveloper(developerId)
     setShowLoader(true)
@@ -128,12 +140,14 @@ export default function Tableau() {
     }, 2000)
   }
 
+  // change le thème
   const toggleTheme = () => {
     const newTheme = !isDarkMode
     setIsDarkMode(newTheme)
     localStorage.setItem('theme', newTheme ? 'dark' : 'light')
   }
 
+  // rendu grille images
   const renderImageGrid = (items, selectedId, onSelect) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 w-full max-w-7xl mx-auto transform transition-all duration-1000">
       {items.map((item) => (
@@ -164,6 +178,7 @@ export default function Tableau() {
     </div>
   )
 
+  // rendu principal
   return (
     <>
       <div className={`min-h-screen relative overflow-hidden ${
@@ -248,7 +263,6 @@ export default function Tableau() {
           </div>
         </div>
       )}
-
       {showSignUp && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -265,4 +279,4 @@ export default function Tableau() {
       )}
     </>
   )
-} 
+}

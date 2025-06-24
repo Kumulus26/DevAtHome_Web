@@ -1,18 +1,22 @@
 'use client'
 
+// Import des composants et hooks nécessaires
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 
 export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onThemeToggle }) {
+  // États pour gérer l'utilisateur et les menus
   const [user, setUser] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const dropdownRef = useRef(null)
   const router = useRouter()
 
+  // Initialisation et gestion des événements
   useEffect(() => {
+    // Fonction pour vérifier l'utilisateur connecté
     const checkUser = () => {
       try {
         const loggedInUser = localStorage.getItem('user')
@@ -34,6 +38,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
       }
     }
 
+    // Gestionnaire pour fermer le dropdown en cliquant à l'extérieur
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false)
@@ -50,6 +55,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
     }
   }, [])
 
+  // Fonction de déconnexion
   const handleLogout = () => {
     try {
       localStorage.removeItem('user')
@@ -61,12 +67,14 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
     }
   }
 
+  // Basculement du dropdown utilisateur
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown)
   }
 
   return (
     <nav className={`relative flex justify-between items-center p-4 sm:p-6 ${isDarkMode ? 'text-white' : 'text-black'}`}>
+      {/* Logo et titre */}
       <Link href="/" className="flex items-center space-x-2 sm:space-x-4 group">
         <div className="w-8 h-8 sm:w-12 sm:h-12 transform transition-transform group-hover:rotate-180 duration-500">
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -95,7 +103,9 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
         </h1>
       </Link>
 
+      {/* Menu de navigation et actions */}
       <div className="flex items-center space-x-6">
+        {/* Navigation desktop */}
         <div className="hidden sm:flex items-center space-x-8">
           <Link href="/tableau" className={`${isDarkMode ? 'text-white' : 'text-black'} hover:text-gray-400 transition-colors`}>
             Table
@@ -104,6 +114,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
             About
           </Link>
           {user ? (
+            // Menu utilisateur connecté
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={toggleDropdown}
@@ -113,6 +124,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
                 Welcome back, {user.username || user.firstName}
               </button>
               
+              {/* Dropdown du menu utilisateur */}
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50">
                   <Link
@@ -168,6 +180,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               )}
             </div>
           ) : (
+            // Bouton de connexion pour utilisateur non connecté
             <button 
               onClick={onLoginClick}
               className={`${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'} 
@@ -177,6 +190,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
             </button>
           )}
           
+          {/* Bouton de basculement du thème */}
           <button
             onClick={onThemeToggle}
             className={`p-2 rounded-full ${
@@ -196,6 +210,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
           </button>
         </div>
 
+        {/* Bouton menu mobile */}
         <button 
           onClick={() => setShowMobileMenu(!showMobileMenu)}
           className={`sm:hidden ${isDarkMode ? 'text-white' : 'text-black'}`}
@@ -216,11 +231,13 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
         </button>
       </div>
 
+      {/* Menu mobile */}
       {showMobileMenu && (
         <div className={`fixed inset-0 z-50 ${isDarkMode ? 'bg-black/90' : 'bg-white/90'} backdrop-blur-sm`}>
           <div className={`fixed inset-y-0 right-0 w-80 ${
             isDarkMode ? 'bg-black' : 'bg-white'
           } p-8 shadow-2xl`}>
+            {/* En-tête du menu mobile */}
             <div className="flex justify-between items-center mb-12">
               <Link href="/" className="flex items-center space-x-2 group">
                 <div className="w-8 h-8 transform transition-transform group-hover:rotate-180 duration-500">
@@ -256,6 +273,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               </button>
             </div>
 
+            {/* Profil utilisateur mobile */}
             {user && (
               <div className="mb-4">
                 <Link
@@ -287,6 +305,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               </div>
             )}
 
+            {/* Navigation mobile */}
             <div className="space-y-2">
               {[
                 { href: '/tableau', label: 'Table' },
@@ -308,6 +327,7 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
               ))}
             </div>
 
+            {/* Actions du menu mobile */}
             <div className="absolute bottom-8 left-8 right-8 space-y-2">
               <button
                 onClick={onThemeToggle}
@@ -365,4 +385,4 @@ export default function Navbar({ onLoginClick, onSettingsClick, isDarkMode, onTh
       )}
     </nav>
   )
-} 
+}

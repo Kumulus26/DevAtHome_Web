@@ -1,14 +1,14 @@
+// API - Commentaires d'une photo
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-// Get all comments for a photo
+// Récupère tous les commentaires d'une photo
 export async function GET(request, { params }) {
   try {
     const photoId = parseInt(params.id)
     if (isNaN(photoId)) {
       return NextResponse.json({ error: 'Invalid photo ID' }, { status: 400 })
     }
-
     const comments = await prisma.Comment.findMany({
       where: { photoId },
       orderBy: { createdAt: 'desc' },
@@ -22,7 +22,6 @@ export async function GET(request, { params }) {
         },
       },
     })
-
     return NextResponse.json(comments)
   } catch (error) {
     console.error(`Error fetching comments for photo ${params.id}:`, error)
@@ -80,39 +79,31 @@ export async function POST(request, { params }) {
   }
 }
 
-// Delete a comment
+// Suppression d'un commentaire
 export async function DELETE(request, { params }) {
   try {
     const photoId = parseInt(params.id)
     const { commentId, userId } = await request.json()
-
     if (isNaN(photoId) || !commentId || !userId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
-
-    // Fetch the comment and the related photo to check for ownership
+    // Vérifie droits de suppression (auteur ou propriétaire de la photo)
     const comment = await prisma.Comment.findUnique({
       where: { id: commentId },
       include: { photo: true },
     })
-
     if (!comment) {
       return NextResponse.json({ error: 'Comment not found' }, { status: 404 })
     }
-
-    // Check if the user is authorized to delete the comment
-    // (either the comment author or the photo owner)
     const isCommentAuthor = comment.userId === userId
     const isPhotoOwner = comment.photo.userId === userId
-
     if (!isCommentAuthor && !isPhotoOwner) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-
-    // Use a transaction to delete the comment and decrement the photo's comment count
+    // Suppression + décrémentation du compteur
     await prisma.$transaction([
       prisma.Comment.delete({
         where: { id: commentId },
@@ -122,7 +113,6 @@ export async function DELETE(request, { params }) {
         data: { commentsCount: { decrement: 1 } },
       }),
     ])
-
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error(`Error deleting comment for photo ${params.id}:`, error)

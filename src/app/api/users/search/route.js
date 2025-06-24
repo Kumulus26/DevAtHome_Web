@@ -1,6 +1,8 @@
+// API - Recherche d'utilisateurs
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+// Recherche utilisateur par nom, prénom ou username
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)

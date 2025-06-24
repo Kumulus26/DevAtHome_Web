@@ -1,12 +1,12 @@
+// API - Paramètres utilisateur (modification et suppression)
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import prisma from '@/lib/prisma'
 
-// Update user settings
+// Modification des paramètres utilisateur
 export async function PUT(request) {
   try {
-    const { userId, firstName, lastName, username, currentPassword, newPassword } =
-      await request.json()
+    const { userId, firstName, lastName, username, currentPassword, newPassword } = await request.json()
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
@@ -18,13 +18,12 @@ export async function PUT(request) {
     if (lastName) dataToUpdate.lastName = lastName
     if (username) dataToUpdate.username = username
 
-    // Handle password update
+    // Changement de mot de passe
     if (currentPassword && newPassword) {
       const user = await prisma.User.findUnique({ where: { id: userId } })
       if (!user) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 })
       }
-
       const isValidPassword = await bcrypt.compare(currentPassword, user.password)
       if (!isValidPassword) {
         return NextResponse.json(
@@ -73,7 +72,7 @@ export async function PUT(request) {
   }
 }
 
-// Delete user account
+// Suppression du compte utilisateur
 export async function DELETE(request) {
   try {
     const { userId } = await request.json()
@@ -82,15 +81,13 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    // Prisma's cascaded delete (configured in schema.prisma) will handle deleting
-    // all related photos, comments, and likes automatically and atomically.
+    // Suppression en cascade (photos, commentaires, likes)
     await prisma.User.delete({
       where: { id: userId },
     })
 
     return NextResponse.json({ message: 'Account deleted successfully' })
   } catch (error) {
-    // P2025 is the error code for "Record to delete does not exist."
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }

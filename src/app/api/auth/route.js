@@ -1,12 +1,15 @@
+// API - Création de compte utilisateur
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
+// Création d'un nouvel utilisateur
 export async function POST(request) {
   try {
     const body = await request.json();
     const { firstName, lastName, email, dateOfBirth, password, username, question1_id, question2_id, answer1, answer2 } = body;
 
+    // vérification des champs obligatoires
     if (!firstName || !lastName || !email || !dateOfBirth || !password || !username || !question1_id || !question2_id || !answer1 || !answer2) {
       return NextResponse.json(
         { error: 'All fields are required' },
@@ -14,6 +17,7 @@ export async function POST(request) {
       );
     }
 
+    // questions secrètes différentes
     if (question1_id === question2_id) {
       return NextResponse.json(
         { error: 'Secret questions must be different' },
@@ -21,10 +25,12 @@ export async function POST(request) {
       );
     }
 
+    // hash du mot de passe et des réponses
     const hashedPassword = await bcrypt.hash(password, 10);
     const hashedAnswer1 = await bcrypt.hash(answer1, 10);
     const hashedAnswer2 = await bcrypt.hash(answer2, 10);
 
+    // création utilisateur
     const user = await prisma.User.create({
       data: {
         firstName,
@@ -41,7 +47,7 @@ export async function POST(request) {
       },
     });
 
-    // eslint-disable-next-line no-unused-vars
+    // on retire le mot de passe de la réponse
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(
@@ -52,7 +58,7 @@ export async function POST(request) {
     console.error('Detailed error:', error);
 
     if (error.code === 'P2002') {
-      // Unique constraint violation (email or username is already taken)
+      // email ou username déjà pris
       return NextResponse.json(
         { error: 'This email or username is already taken' },
         { status: 400 }

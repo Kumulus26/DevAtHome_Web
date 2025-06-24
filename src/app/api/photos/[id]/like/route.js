@@ -1,6 +1,8 @@
+// API - Like/Unlike d'une photo
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+// Like ou Unlike une photo
 export async function POST(request, { params }) {
   try {
     const photoId = parseInt(params.id)
@@ -13,7 +15,7 @@ export async function POST(request, { params }) {
       )
     }
 
-    // Find if the like already exists
+    // Vérifie si le like existe déjà
     const existingLike = await prisma.Like.findUnique({
       where: {
         userId_photoId: {
@@ -27,7 +29,7 @@ export async function POST(request, { params }) {
     let liked
 
     if (existingLike) {
-      // If like exists, "unlike" the photo
+      // Si déjà liké, on unlike
       [, updatedPhoto] = await prisma.$transaction([
         prisma.Like.delete({
           where: {
@@ -45,7 +47,7 @@ export async function POST(request, { params }) {
       ])
       liked = false
     } else {
-      // If like doesn't exist, "like" the photo
+      // Sinon, on like
       [, updatedPhoto] = await prisma.$transaction([
         prisma.Like.create({
           data: {
@@ -65,10 +67,10 @@ export async function POST(request, { params }) {
       liked = true
     }
 
-      return NextResponse.json({ 
+    return NextResponse.json({ 
       liked,
       likes: updatedPhoto.likes,
-      })
+    })
   } catch (error) {
     console.error(`Error handling like for photo ${params.id}:`, error)
     return NextResponse.json(

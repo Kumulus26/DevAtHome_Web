@@ -1,3 +1,4 @@
+// API - Connexion utilisateur
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
@@ -5,11 +6,13 @@ import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
+// Récupère l'adresse IP
 function getIP(request) {
   // Try to get real IP from headers (Vercel/Proxy aware)
   return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
 }
 
+// Connexion utilisateur
 export async function POST(request) {
   try {
     const { email, password } = await request.json()
@@ -17,7 +20,7 @@ export async function POST(request) {
     const userAgent = request.headers.get('user-agent') || ''
     const now = new Date()
 
-    // Check for active block
+    // Vérifie blocage temporaire
     const lastBlock = await prisma.login_attempts.findFirst({
       where: {
         email,
@@ -34,6 +37,7 @@ export async function POST(request) {
       )
     }
 
+    // Cherche l'utilisateur
     const user = await prisma.User.findUnique({ where: { email } })
     let success = false
     let block_until = null
@@ -43,7 +47,7 @@ export async function POST(request) {
       success = isValidPassword
     }
 
-    // Log the attempt
+    // Log la tentative
     await prisma.login_attempts.create({
       data: {
         email,
@@ -55,6 +59,7 @@ export async function POST(request) {
       },
     })
 
+    // Gestion des erreurs et blocages
     if (!user || !success) {
       // Count failed attempts in last 10min
       const tenMinAgo = new Date(now.getTime() - 10 * 60 * 1000)
@@ -90,6 +95,7 @@ export async function POST(request) {
       )
     }
 
+    // Génère le token JWT
     const token = jwt.sign(
       { userId: user.id },
       JWT_SECRET,

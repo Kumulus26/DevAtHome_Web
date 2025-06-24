@@ -1,5 +1,6 @@
 'use client'
 
+// imports
 import { useState, useEffect, useRef, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '../../ThemeContext'
@@ -8,7 +9,9 @@ import Navbar from '@/components/Navbar'
 import Image from 'next/image'
 import Link from 'next/link'
 
+// page profil utilisateur public
 export default function Profile({ params }) {
+  // hooks et états
   const pageParams = use(params)
   const router = useRouter()
   const [user, setUser] = useState(null)
@@ -27,34 +30,29 @@ export default function Profile({ params }) {
   const [isEditMode, setIsEditMode] = useState(false)
   const { isDarkMode, toggleTheme } = useTheme()
 
+  // récupère le profil utilisateur public
   useEffect(() => {
     const fetchProfile = async () => {
       if (!pageParams?.username) {
         setLoading(false)
         return
       }
-
       try {
         const username = pageParams.username
         const response = await fetch(`/api/profile/${username}`)
         const data = await response.json()
-
         if (response.status === 404) {
           setError('User not found')
           return
         }
-
         if (!response.ok) {
           throw new Error(data.error || 'Error fetching profile')
         }
-
         if (!data || typeof data !== 'object') {
           throw new Error('Invalid response data')
         }
-
         setUser(data)
         setBio(data.bio || '')
-
         const loggedInUser = localStorage.getItem('user')
         if (loggedInUser) {
           try {
@@ -72,39 +70,33 @@ export default function Profile({ params }) {
         setLoading(false)
       }
     }
-
     fetchProfile()
   }, [pageParams?.username])
 
+  // upload image profil
   const handleImageUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
-
     const formData = new FormData()
     formData.append('file', file)
     formData.append('userId', user.id)
     formData.append('isProfilePicture', 'true')
-
     try {
       const uploadResponse = await fetch('/api/photos/upload', {
         method: 'POST',
         body: formData,
       })
-
       if (!uploadResponse.ok) {
         const error = await uploadResponse.json()
         throw new Error(error.details || error.message || 'Failed to upload image')
       }
-
       const data = await uploadResponse.json()
-      
-      // Update the user state with the new data
+      // met à jour l'image de profil
       setUser(prev => ({
         ...prev,
         profileImage: data.imageUrl
       }))
-
-      // Update local storage if it's the current user
+      // met à jour le local storage si c'est l'utilisateur courant
       const loggedInUser = localStorage.getItem('user')
       if (loggedInUser) {
         const parsedUser = JSON.parse(loggedInUser)
@@ -121,6 +113,7 @@ export default function Profile({ params }) {
     }
   }
 
+  // sauvegarde la bio
   const handleSaveBio = async () => {
     try {
       const response = await fetch('/api/profile/update', {
@@ -133,13 +126,10 @@ export default function Profile({ params }) {
           bio: bio
         }),
       })
-
       const data = await response.json()
-      
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update bio')
       }
-
       setUser({ ...user, bio: bio })
       setIsEditing(false)
     } catch (err) {
@@ -147,24 +137,21 @@ export default function Profile({ params }) {
     }
   }
 
+  // recherche utilisateur
   const handleSearch = async (e) => {
     const query = e.target.value
     setSearchQuery(query)
-
     if (query.length < 2) {
       setSearchResults([])
       return
     }
-
     setIsSearching(true)
     try {
       const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
       const data = await response.json()
-      
       if (!response.ok) {
         throw new Error(data.error || 'Search failed')
       }
-
       setSearchResults(data.users)
     } catch (err) {
       console.error('Search error:', err)
@@ -173,58 +160,50 @@ export default function Profile({ params }) {
     }
   }
 
+  // upload photo
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0]
     const title = prompt('Enter a title for your photo:', 'Untitled')
     if (!file) return
-
     const formData = new FormData()
     formData.append('file', file)
     formData.append('userId', user.id)
     formData.append('title', title || 'Untitled')
     formData.append('isProfilePicture', 'false')
-
     try {
       const uploadResponse = await fetch('/api/photos/upload', {
         method: 'POST',
         body: formData,
       })
-
       if (!uploadResponse.ok) {
         const error = await uploadResponse.json()
         throw new Error(error.details || error.message || 'Failed to upload photo')
       }
-
       const data = await uploadResponse.json()
-      
-      // Update the user's photos array with the new photo
+      // ajoute la photo à la liste
       setUser(prev => ({
         ...prev,
         photos: [...(prev.photos || []), data.photo]
       }))
-
     } catch (err) {
       console.error('Upload error:', err)
       alert('Failed to upload photo. Please try again.')
     }
   }
 
+  // suppression photo
   const handleDeletePhoto = async (photoId) => {
     try {
       const response = await fetch(`/api/photos/delete/${photoId}`, {
         method: 'DELETE',
       })
-
       if (!response.ok) {
         throw new Error('Failed to delete photo')
       }
-
       const data = await response.json()
-      
       if (data.error) {
         throw new Error(data.error)
       }
-
       setUser(prev => ({
         ...prev,
         photos: prev.photos.filter(photo => photo.id !== photoId)
@@ -235,6 +214,7 @@ export default function Profile({ params }) {
     }
   }
 
+  // logo blanc
   const WhiteLogo = () => (
     <Link href="/" className="flex items-center space-x-4">
       <div className="w-12 h-12">

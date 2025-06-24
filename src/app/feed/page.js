@@ -1,5 +1,6 @@
 'use client'
 
+// imports
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -10,8 +11,10 @@ import SignUp from '../signup/page'
 import { useTheme } from '../ThemeContext'
 import Background from '@/components/Background'
 
+// composant principal
 export default function Feed() {
   const router = useRouter()
+  // états
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -22,6 +25,7 @@ export default function Feed() {
   const [showSignUp, setShowSignUp] = useState(false)
   const { isDarkMode, toggleTheme } = useTheme()
 
+  // récupère l'utilisateur connecté
   useEffect(() => {
     const loggedInUser = localStorage.getItem('user')
     if (loggedInUser) {
@@ -29,6 +33,7 @@ export default function Feed() {
     }
   }, [])
 
+  // récupère les photos
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
@@ -48,6 +53,7 @@ export default function Feed() {
     fetchPhotos()
   }, [])
 
+  // like une photo
   const handleLike = async (photoId) => {
     if (!user) {
       router.push('/login')
@@ -80,6 +86,7 @@ export default function Feed() {
     }
   }
 
+  // ajoute un commentaire
   const handleComment = async (photoId) => {
     if (!user) {
       router.push('/login')
@@ -119,21 +126,25 @@ export default function Feed() {
     }
   }
 
+  // ouvre la modale login
   const handleLoginClick = () => {
     setShowSignUp(false)
     setShowLogin(true)
   }
 
+  // ouvre la modale signup
   const handleSignUpClick = () => {
     setShowLogin(false)
     setShowSignUp(true)
   }
 
+  // ferme les modales
   const handleCloseModals = () => {
     setShowLogin(false)
     setShowSignUp(false)
   }
 
+  // loading
   if (loading) {
     return (
       <div className={`min-h-screen relative overflow-hidden ${isDarkMode ? 'text-white' : 'text-black'}`}>
@@ -161,6 +172,7 @@ export default function Feed() {
     )
   }
 
+  // erreur
   if (error) {
     return (
       <div className={`min-h-screen relative overflow-hidden ${isDarkMode ? 'text-white' : 'text-black'}`}>
@@ -186,6 +198,7 @@ export default function Feed() {
     )
   }
 
+  // affichage principal
   return (
     <div className={`min-h-screen relative overflow-hidden ${isDarkMode ? 'text-white' : 'text-black'}`}>
       <Background isDarkMode={isDarkMode} />
@@ -201,13 +214,16 @@ export default function Feed() {
             isDarkMode ? 'bg-white/5' : 'bg-black/5'
           } backdrop-blur-sm p-8 lg:p-12`}>
             {photos.length === 0 ? (
+              // pas de photos
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">No photos yet.</p>
               </div>
             ) : (
+              // liste des photos
               <div className="space-y-6">
                 {photos.map((photo) => (
                   <div key={photo.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    {/* utilisateur */}
                     <div className="flex items-center p-4">
                       <Link href={`/profile/${photo.user.username}`} className="flex items-center">
                         <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
@@ -233,6 +249,7 @@ export default function Feed() {
                       </Link>
                     </div>
 
+                    {/* image */}
                     <div className="relative aspect-square bg-black">
                       <Image
                         src={photo.url}
@@ -245,6 +262,7 @@ export default function Feed() {
                     </div>
 
                     <div className="p-4">
+                      {/* boutons like/commentaire */}
                       <div className="flex items-center space-x-4">
                         <button 
                           onClick={() => handleLike(photo.id)}
@@ -275,10 +293,12 @@ export default function Feed() {
                         </button>
                       </div>
 
+                      {/* nombre de likes */}
                       <div className="mt-2">
                         <span className="font-medium text-sm">{photo.likes} likes</span>
                       </div>
 
+                      {/* titre de la photo */}
                       {photo.title && (
                         <div className="mt-1">
                           <Link href={`/profile/${photo.user.username}`} className="font-medium text-sm hover:underline">
@@ -288,6 +308,7 @@ export default function Feed() {
                         </div>
                       )}
 
+                      {/* lien vers les commentaires */}
                       {photo.commentsCount > 0 && (
                         <Link 
                           href={`/p/${photo.id}`}
@@ -297,6 +318,7 @@ export default function Feed() {
                         </Link>
                       )}
 
+                      {/* input pour ajouter un commentaire */}
                       {commentingPhotoId === photo.id && (
                         <div className="mt-3 flex items-center">
                           <input
@@ -321,6 +343,7 @@ export default function Feed() {
                         </div>
                       )}
 
+                      {/* date de la photo */}
                       <div className="mt-2 text-xs text-gray-500">
                         {new Date(photo.createdAt).toLocaleDateString('en-US', {
                           month: 'long',
@@ -336,6 +359,7 @@ export default function Feed() {
         </main>
       </div>
 
+      {/* modale login */}
       {showLogin && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -351,6 +375,7 @@ export default function Feed() {
         </div>
       )}
 
+      {/* modale signup */}
       {showSignUp && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"

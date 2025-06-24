@@ -1,8 +1,9 @@
+// API - Mot de passe oublié
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
-// POST: Get questions by email
+// POST : Récupère les questions secrètes par email
 export async function POST(request) {
   try {
     const { email } = await request.json();
@@ -27,7 +28,7 @@ export async function POST(request) {
   }
 }
 
-// PUT: Verify answers
+// PUT : Vérifie les réponses secrètes
 export async function PUT(request) {
   try {
     const { userId, answer1, answer2 } = await request.json();

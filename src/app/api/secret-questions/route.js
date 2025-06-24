@@ -1,6 +1,8 @@
+// API - Questions secrètes
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+// Récupère toutes les questions secrètes
 export async function GET() {
   try {
     const questions = await prisma.secret_questions.findMany({

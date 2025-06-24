@@ -1,4 +1,5 @@
 'use client'
+// Import des composants nécessaires
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
@@ -10,6 +11,7 @@ import { X } from 'lucide-react'
 import { TableIcon, InfoIcon, UserIcon, GridIcon, Settings as SettingsIcon, LogOut } from 'lucide-react'
 
 export default function Home() {
+  // États pour gérer les modales et l'utilisateur
   const [showLogin, setShowLogin] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -17,16 +19,19 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  // Initialisation au chargement de la page
   useEffect(() => {
+    // Récupération de l'utilisateur connecté depuis localStorage
     const loggedInUser = localStorage.getItem('user')
     if (loggedInUser) {
       setUser(JSON.parse(loggedInUser))
     }
-    // Check localStorage for theme preference
+    // Vérification du thème sauvegardé
     const savedTheme = localStorage.getItem('theme')
-    setIsDarkMode(savedTheme === 'dark' || savedTheme === null) // Default to dark mode
+    setIsDarkMode(savedTheme === 'dark' || savedTheme === null) // Mode sombre par défaut
   }, [])
 
+  // Gestionnaires d'événements pour les modales
   const handleLoginClick = () => {
     setShowSignUp(false)
     setShowLogin(true)
@@ -47,6 +52,7 @@ export default function Home() {
     setShowSettings(false)
   }
 
+  // Basculement du thème
   const toggleTheme = () => {
     const newTheme = !isDarkMode
     setIsDarkMode(newTheme)
@@ -55,9 +61,11 @@ export default function Home() {
 
   return (
     <>
+      {/* Conteneur principal avec effet de flou pour les modales */}
       <div className={`min-h-screen relative overflow-hidden ${
         showLogin || showSignUp || showSettings ? 'blur-sm transition-all duration-200' : ''
       } ${isDarkMode ? 'text-white' : 'text-black'}`}>
+        {/* Arrière-plan avec motif de points */}
         <div className={`absolute inset-0 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
           <div 
             className={`absolute inset-0 ${
@@ -69,6 +77,7 @@ export default function Home() {
         </div>
 
         <div className="relative">
+          {/* Barre de navigation */}
           <Navbar 
             onLoginClick={handleLoginClick}
             onSettingsClick={handleSettingsClick}
@@ -76,12 +85,14 @@ export default function Home() {
             onThemeToggle={toggleTheme}
           />
 
+          {/* Contenu principal */}
           <main className="container mx-auto px-6 py-12">
             <div className={`relative rounded-3xl overflow-hidden ${
               isDarkMode ? 'bg-white/5' : 'bg-black/5'
             } backdrop-blur-sm p-8 lg:p-12`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-8 relative z-10">
+                  {/* Titre principal */}
                   <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-black'}`}>
                     Your 
                     <span> Black </span> 
@@ -95,11 +106,14 @@ export default function Home() {
                     </span>                
                     <span> films deserve the best 🎞️</span>
                   </h1>
+                  {/* Sous-titre */}
                   <p className={`text-lg sm:text-xl ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     The development at home will no longer be a secret for you.
                   </p>
                   
+                  {/* Cartes de statistiques */}
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mt-8 sm:mt-16">
+                    {/* Carte des recettes */}
                     <div className={`${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'} 
                       w-full sm:w-auto p-6 sm:p-8 rounded-2xl backdrop-blur-sm transform transition-all duration-300 hover:scale-105 
                       border ${isDarkMode ? 'border-white/20' : 'border-black/20'}`}>
@@ -111,6 +125,7 @@ export default function Home() {
                       </div>
                     </div>
                     
+                    {/* Carte de la communauté */}
                     <div className={`${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'} 
                       w-full sm:w-auto p-6 sm:p-8 rounded-2xl backdrop-blur-sm transform transition-all duration-300 hover:scale-105
                       border ${isDarkMode ? 'border-black/20' : 'border-white/20'}`}>
@@ -120,6 +135,7 @@ export default function Home() {
                       <div className="mt-2">
                         An active community
                       </div>
+                      {/* Avatars de la communauté */}
                       <div className="flex items-center mt-4 space-x-2">
                         <div className="flex -space-x-2">
                           {[...Array(3)].map((_, i) => (
@@ -142,6 +158,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Modale des paramètres */}
       {showSettings && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center"
@@ -159,6 +176,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* Modale de connexion */}
       {showLogin && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -174,6 +192,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* Modale d'inscription */}
       {showSignUp && (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center"
@@ -189,12 +208,14 @@ export default function Home() {
         </div>
       )}
 
+      {/* Menu latéral mobile */}
       <div className={`fixed inset-0 bg-black/60 backdrop-blur-md z-50 transition-all duration-300 ${
         isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}>
         <div className={`fixed inset-y-0 left-0 w-72 ${isDarkMode ? 'bg-gray-900' : 'bg-white'} p-6 shadow-2xl transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
+          {/* En-tête du menu */}
           <div className="flex justify-between items-center mb-10">
             <Link href="/" className="flex items-center space-x-2">
               <Image src="/logo.svg" alt="DevAtHome Logo" width={32} height={32} />
@@ -214,6 +235,7 @@ export default function Home() {
             </button>
           </div>
 
+          {/* Navigation du menu */}
           <nav className="space-y-2 flex flex-col items-center mt-10">
             {[
               { href: '/table', icon: TableIcon, label: 'Table' },
@@ -238,10 +260,12 @@ export default function Home() {
             ))}
           </nav>
 
+          {/* Séparateur */}
           <div className={`my-6 border-t ${
             isDarkMode ? 'border-white/10' : 'border-black/10'
           }`} />
 
+          {/* Actions du menu */}
           <div className="space-y-2 flex flex-col items-center">
             {[
               { icon: SettingsIcon, label: 'Settings' },
@@ -264,6 +288,7 @@ export default function Home() {
               </button>
             ))}
           </div>
+          {/* Version de l'application */}
           <div className={`absolute bottom-6 left-0 right-0 text-sm text-center ${
             isDarkMode ? 'text-gray-500' : 'text-gray-400'
           }`}>

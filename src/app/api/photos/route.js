@@ -1,6 +1,8 @@
+// API - Récupération des photos (GET)
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+// Récupère toutes les photos
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -18,26 +20,25 @@ export async function GET(request) {
             profileImage: true,
           },
         },
-        // If a userId is provided, check if that user has liked the photo
+        // Si userId fourni, check si l'utilisateur a liké la photo
         likedBy: userId
           ? {
               where: {
                 userId: parseInt(userId),
               },
               select: {
-                userId: true, // We only need to know if a record exists
+                userId: true,
               },
             }
-          : false, // Do not include likedBy if no userId is given
+          : false,
       },
     })
 
-    // Format the photos to include an `isLiked` boolean
+    // Ajoute isLiked à chaque photo
     const formattedPhotos = photos.map((photo) => {
       const { likedBy, ...rest } = photo
       return {
         ...rest,
-        // The photo is liked if the likedBy array has one or more items
         isLiked: likedBy ? likedBy.length > 0 : false,
       }
     })

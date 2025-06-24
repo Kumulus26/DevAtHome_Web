@@ -1,6 +1,8 @@
+// API - Profil utilisateur public (GET)
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+// Récupère le profil d'un utilisateur par username
 export async function GET(request, { params }) {
   try {
     const username = params.username;
@@ -25,7 +27,7 @@ export async function GET(request, { params }) {
         },
         _count: {
           select: {
-            photos: true, // Counts the number of photos
+            photos: true, // Nombre de photos
           },
         },
       },
@@ -38,7 +40,7 @@ export async function GET(request, { params }) {
       )
     }
 
-    // Calculate total likes and comments from the fetched photos
+    // Calcule le total des likes et commentaires
     const totalLikes = user.photos.reduce((sum, photo) => sum + photo.likes, 0)
     const totalComments = user.photos.reduce((sum, photo) => sum + photo.commentsCount, 0)
 
@@ -50,7 +52,7 @@ export async function GET(request, { params }) {
         totalComments,
       },
     }
-    // Remove the _count field from the final response
+    // On retire le champ _count de la réponse
     delete response._count
 
     return NextResponse.json(response)
@@ -61,6 +63,6 @@ export async function GET(request, { params }) {
       { status: 500 }
     )
   }
-} 
+}
 
 export const dynamic = 'force-dynamic'; 

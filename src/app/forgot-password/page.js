@@ -1,8 +1,11 @@
 "use client";
+// imports
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// page mot de passe oublié
 export default function ForgotPassword() {
+  // hooks et états
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -14,6 +17,7 @@ export default function ForgotPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // vérifie la force du mot de passe
   const isStrongPassword = (password) =>
     password.length >= 12 &&
     /[A-Z]/.test(password) &&
@@ -21,6 +25,7 @@ export default function ForgotPassword() {
     /[0-9]/.test(password) &&
     /[^A-Za-z0-9]/.test(password);
 
+  // étape 1 : envoie email
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -43,6 +48,7 @@ export default function ForgotPassword() {
     }
   };
 
+  // étape 2 : vérifie réponses secrètes
   const handleAnswersSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -63,6 +69,7 @@ export default function ForgotPassword() {
     }
   };
 
+  // étape 3 : reset mot de passe
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setError("");
@@ -93,6 +100,7 @@ export default function ForgotPassword() {
     }
   };
 
+  // rendu principal
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-6">
       <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-8 shadow-xl">
@@ -102,7 +110,7 @@ export default function ForgotPassword() {
             className="text-blue-400 hover:underline text-sm"
             onClick={() => router.push('/')}
           >
-            ← Back to Home
+             Back to Home
           </button>
         </div>
         <h1 className="text-2xl font-bold text-white mb-6 text-center">Reset Password</h1>
@@ -200,4 +208,4 @@ export default function ForgotPassword() {
       </div>
     </div>
   );
-} 
+}

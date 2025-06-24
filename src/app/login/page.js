@@ -1,11 +1,14 @@
 'use client'
 
+// imports
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
+// page de connexion
 export default function Login({ isModal = false, onClose, onSignUpClick }) {
+  // hooks et états
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: '',
@@ -14,6 +17,7 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // vérifie expiration du token
   const checkTokenExpiration = () => {
     const userData = localStorage.getItem('user')
     if (userData) {
@@ -39,6 +43,7 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
     return () => clearInterval(interval)
   }, [])
 
+  // gestion des inputs
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -46,6 +51,7 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
     })
   }
 
+  // envoie du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -82,12 +88,14 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
     }
   }
 
+  // gestion du clic sur le fond
   const handleBackgroundClick = (e) => {
     if (isModal && e.target === e.currentTarget) {
       onClose?.()
     }
   }
 
+  // rendu principal
   return (
     <div 
       className={`${isModal ? '' : 'min-h-screen bg-black'} flex items-start justify-center pt-24 p-6`}
@@ -204,24 +212,6 @@ export default function Login({ isModal = false, onClose, onSignUpClick }) {
             </p>
           </div>
         </div>
-
-        {!isModal && (
-          <div className="mt-12 text-center">
-            <p className="text-zinc-400">
-              Join over <span className="text-white font-semibold">2M</span> global social media users
-            </p>
-            <div className="flex justify-center -space-x-2 mt-4">
-              <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-300"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-400"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-500"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-600"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-700"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center text-xs text-white">
-                +2
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

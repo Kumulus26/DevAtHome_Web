@@ -1,11 +1,14 @@
 'use client'
 
+// imports
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
+// page détail photo
 export default function PhotoPage({ params }) {
+  // hooks et états
   const pageParams = use(params)
   const router = useRouter()
   const [photo, setPhoto] = useState(null)
@@ -16,6 +19,7 @@ export default function PhotoPage({ params }) {
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // récupère l'utilisateur connecté
   useEffect(() => {
     const loggedInUser = localStorage.getItem('user')
     if (loggedInUser) {
@@ -23,6 +27,7 @@ export default function PhotoPage({ params }) {
     }
   }, [])
 
+  // récupère la photo
   useEffect(() => {
     const fetchPhoto = async () => {
       try {
@@ -44,6 +49,7 @@ export default function PhotoPage({ params }) {
     fetchPhoto()
   }, [pageParams.id, user])
 
+  // récupère les commentaires
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -59,12 +65,12 @@ export default function PhotoPage({ params }) {
     fetchComments()
   }, [pageParams.id])
 
+  // like la photo
   const handleLike = async () => {
     if (!user) {
       router.push('/login')
       return
     }
-
     try {
       const res = await fetch(`/api/photos/${pageParams.id}/like`, {
         method: 'POST',
@@ -73,7 +79,6 @@ export default function PhotoPage({ params }) {
         },
         body: JSON.stringify({ userId: user.id })
       })
-
       const data = await res.json()
       if (res.ok) {
         setIsLiked(data.liked)
@@ -87,15 +92,14 @@ export default function PhotoPage({ params }) {
     }
   }
 
+  // ajoute un commentaire
   const handleComment = async (e) => {
     e.preventDefault()
     if (!user) {
       router.push('/login')
       return
     }
-
     if (!newComment.trim()) return
-
     setIsSubmitting(true)
     try {
       const res = await fetch(`/api/photos/${pageParams.id}/comments`, {
@@ -108,7 +112,6 @@ export default function PhotoPage({ params }) {
           userId: user.id
         })
       })
-
       const data = await res.json()
       if (res.ok) {
         setComments(prev => [data, ...prev])
@@ -125,9 +128,9 @@ export default function PhotoPage({ params }) {
     }
   }
 
+  // supprime un commentaire
   const handleDeleteComment = async (commentId) => {
     if (!user) return
-
     try {
       const res = await fetch(`/api/photos/${pageParams.id}/comments`, {
         method: 'DELETE',
@@ -139,7 +142,6 @@ export default function PhotoPage({ params }) {
           userId: user.id
         })
       })
-
       if (res.ok) {
         setComments(prev => prev.filter(comment => comment.id !== commentId))
         setPhoto(prev => ({
@@ -155,12 +157,14 @@ export default function PhotoPage({ params }) {
     }
   }
 
+  // clic en dehors de la modale
   const handleOutsideClick = (e) => {
     if (e.target.classList.contains('modal-backdrop')) {
       router.back()
     }
   }
 
+  // rendu loading
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center">
@@ -169,6 +173,7 @@ export default function PhotoPage({ params }) {
     )
   }
 
+  // rendu si photo non trouvée
   if (!photo) {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center">
@@ -182,6 +187,7 @@ export default function PhotoPage({ params }) {
     )
   }
 
+  // rendu principal
   return (
     <div 
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 modal-backdrop"
@@ -251,75 +257,70 @@ export default function PhotoPage({ params }) {
                   )}
                 </div>
                 <div>
-                  <Link
-                    href={`/profile/${comment.user.username}`}
-                    className="font-medium text-white hover:underline"
-                  >
-                    {comment.user.username}
-                  </Link>{' '}
-                  <span className="text-gray-300">{comment.content}</span>
-                  {user && (comment.userId === user.id || photo.userId === user.id) && (
-                    <button
-                      onClick={() => handleDeleteComment(comment.id)}
-                      className="ml-2 text-gray-500 hover:text-red-500"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium text-white text-sm">{comment.user.username}</span>
+                    <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                    {user && comment.user.id === user.id && (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="ml-2 text-xs text-red-400 hover:underline"
+                      >
+                        Supprimer
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-gray-200 text-sm mt-1">{comment.content}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="border-t border-gray-800 p-4">
-            <div className="flex items-center space-x-4 mb-4">
-              <button 
-                onClick={handleLike}
-                className="text-white hover:text-gray-300"
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-6 w-6 ${photo.isLiked ? 'text-red-500 fill-current' : ''}`}
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
-                  />
-                </svg>
-              </button>
-              <span className="text-white">{photo.likes} likes</span>
-            </div>
+          <form onSubmit={handleComment} className="p-4 border-t border-gray-800 flex items-center">
+            <input
+              type="text"
+              placeholder="Ajouter un commentaire..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="flex-1 bg-transparent text-white text-sm border-gray-700 focus:ring-white focus:border-white rounded-lg"
+              disabled={isSubmitting}
+            />
+            <button
+              type="submit"
+              disabled={!newComment.trim() || isSubmitting}
+              className="ml-2 px-3 py-1 text-sm bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+            >
+              Poster
+            </button>
+          </form>
 
-            {user && (
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleComment(e)
-                    }
-                  }}
+          <div className="p-4 border-t border-gray-800 flex items-center justify-between">
+            <button
+              onClick={handleLike}
+              className={`flex items-center space-x-1 focus:outline-none ${isLiked ? 'text-red-500' : 'text-white'}`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
-                <button
-                  onClick={handleComment}
-                  disabled={!newComment.trim()}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
-                >
-                  Post
-                </button>
-              </div>
-            )}
+              </svg>
+              <span>{photo.likes} likes</span>
+            </button>
+            <span className="text-xs text-gray-400">
+              {new Date(photo.createdAt).toLocaleDateString('fr-FR', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </span>
           </div>
         </div>
       </div>

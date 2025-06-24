@@ -1,9 +1,10 @@
+// API - Upload photo (S3 + DB)
 import { NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import prisma from '@/lib/prisma'
 import path from 'path'
 
-// Force-load environment variables using an explicit path
+// Chargement des variables d'environnement
 require('dotenv').config({ path: path.resolve(process.cwd(), '.env') })
 
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME
@@ -22,6 +23,7 @@ const s3Client = new S3Client({
 
 console.log('S3 Client Initialized:', s3Client); // <-- ADDING THIS DEBUG LOG
 
+// Upload d'une photo
 export async function POST(request) {
   try {
     const formData = await request.formData()
@@ -37,6 +39,7 @@ export async function POST(request) {
       )
     }
 
+    // Prépare le buffer et le nom de fichier
     const buffer = Buffer.from(await file.arrayBuffer())
     const filename = `photos/${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`
 
@@ -48,10 +51,12 @@ export async function POST(request) {
       ACL: 'public-read'
     }
 
+    // Upload sur S3
     await s3Client.send(new PutObjectCommand(uploadParams))
     const fileUrl = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${filename}`
 
     if (isProfilePicture) {
+      // Mise à jour de la photo de profil
       const updatedUser = await prisma.User.update({
         where: { id: userId },
         data: { profileImage: fileUrl },
@@ -61,8 +66,9 @@ export async function POST(request) {
         success: true,
         user: userWithoutPassword,
         imageUrl: fileUrl,
-        })
-      } else {
+      })
+    } else {
+      // Création d'une nouvelle photo
       const newPhoto = await prisma.Photo.create({
         data: {
           url: fileUrl,
@@ -73,11 +79,10 @@ export async function POST(request) {
           user: true,
         },
       })
-
-        return NextResponse.json({
-          success: true,
+      return NextResponse.json({
+        success: true,
         photo: newPhoto,
-        })
+      })
     }
   } catch (error) {
     console.error('Upload error:', error)

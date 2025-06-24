@@ -1,10 +1,13 @@
 'use client'
 
+// imports
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 
+// page paramètres
 export default function Settings({ isModal = false, onClose }) {
+  // hooks et états
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [formData, setFormData] = useState({
@@ -20,6 +23,7 @@ export default function Settings({ isModal = false, onClose }) {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // récupère l'utilisateur connecté
   useEffect(() => {
     const loggedInUser = localStorage.getItem('user')
     if (!loggedInUser) {
@@ -36,6 +40,7 @@ export default function Settings({ isModal = false, onClose }) {
     }))
   }, [router])
 
+  // gestion des inputs
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -45,6 +50,7 @@ export default function Settings({ isModal = false, onClose }) {
     setSuccess('')
   }
 
+  // envoie du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -105,6 +111,7 @@ export default function Settings({ isModal = false, onClose }) {
     }
   }
 
+  // suppression du compte
   const handleDeleteAccount = async () => {
     try {
       const response = await fetch('/api/settings', {
@@ -133,11 +140,11 @@ export default function Settings({ isModal = false, onClose }) {
     return null
   }
 
+  // rendu principal
   return (
     <div 
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
       onClick={(e) => {
-        // Only close if clicking the backdrop
         if (e.target === e.currentTarget) {
           onClose?.()
         }
@@ -147,6 +154,7 @@ export default function Settings({ isModal = false, onClose }) {
         className={`bg-zinc-900 p-8 rounded-3xl shadow-xl w-full max-w-md mx-4 ${isModal ? '' : 'mt-0'}`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* titre */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 mx-auto mb-4">
             <svg viewBox="0 0 100 100" className="w-full h-full">

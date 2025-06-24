@@ -1,10 +1,13 @@
 'use client'
 
+// imports
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 
+// page profil utilisateur connecté
 export default function Profile() {
+  // hooks et états
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [bio, setBio] = useState('')
@@ -12,6 +15,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // récupère le profil utilisateur
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -43,6 +47,7 @@ export default function Profile() {
     fetchProfile()
   }, [router])
 
+  // sauvegarde la bio
   const handleSaveBio = async () => {
     try {
       const response = await fetch('/api/profile/update', {
@@ -72,7 +77,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white relative">
-        {/* Dot pattern overlay */}
+        // motif fond
         <div 
           className="absolute inset-0 opacity-5"
           style={{
@@ -91,7 +96,7 @@ export default function Profile() {
   if (error) {
     return (
       <div className="min-h-screen bg-white relative">
-        {/* Dot pattern overlay */}
+        // motif fond
         <div 
           className="absolute inset-0 opacity-5"
           style={{
@@ -109,9 +114,10 @@ export default function Profile() {
 
   if (!user) return null
 
+  // rendu principal
   return (
     <div className="min-h-screen bg-white relative">
-      {/* Dot pattern overlay */}
+      // motif fond
       <div 
         className="absolute inset-0 opacity-5"
         style={{
@@ -122,9 +128,9 @@ export default function Profile() {
       <Navbar />
       <div className="max-w-4xl mx-auto pt-20 px-4 relative z-10">
         <div className="bg-gray-100 rounded-3xl p-8 shadow-xl">
-          {/* Profile Header */}
+          // header profil
           <div className="flex items-center space-x-8">
-            {/* Profile Image */}
+            // image profil
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
               {user?.profileImage ? (
                 <img 
@@ -138,15 +144,13 @@ export default function Profile() {
                 </svg>
               )}
             </div>
-
-            {/* Profile Info */}
+            // infos profil
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-black mb-2">
                 {user.firstName} {user.lastName}
               </h1>
               <p className="text-gray-600">@{user.username}</p>
-              
-              {/* Bio */}
+              // bio
               <div className="mt-4">
                 {isEditing ? (
                   <textarea
@@ -162,8 +166,7 @@ export default function Profile() {
               </div>
             </div>
           </div>
-
-          {/* Stats */}
+          // stats
           <div className="flex justify-center space-x-16 mt-8">
             <div className="text-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,8 +186,7 @@ export default function Profile() {
               </svg>
             </div>
           </div>
-
-          {/* Action Buttons */}
+          // boutons actions
           <div className="flex justify-center space-x-4 mt-8">
             {isEditing ? (
               <>
@@ -224,4 +226,4 @@ export default function Profile() {
       </div>
     </div>
   )
-} 
+}

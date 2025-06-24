@@ -1,6 +1,8 @@
+// API - Détail d'une photo (GET)
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+// Récupère une photo par son id
 export async function GET(request, { params }) {
   try {
     const photoId = parseInt(params.id)

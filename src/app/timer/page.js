@@ -1,12 +1,15 @@
 'use client'
 
+// imports
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useTheme } from '../ThemeContext'
 import Background from '@/components/Background'
 
+// composant timer principal
 function TimerContent() {
+  // hooks et états
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedISO, setSelectedISO] = useState(null)
@@ -17,15 +20,18 @@ function TimerContent() {
   const [currentProcess, setCurrentProcess] = useState('developer')
   const { isDarkMode } = useTheme()
 
+  // récupère les paramètres film/développeur
   const selectedFilm = searchParams.get('film')
   const selectedDeveloper = searchParams.get('developer')
 
+  // étapes du process
   const processes = {
     developer: { name: 'Developer', time: developmentTime ? developmentTime * 60 : 0 },
     stopBath: { name: 'Stop Bath', time: 120 },
     fixer: { name: 'Fixer', time: 420 }
   }
 
+  // beep sonore
   const beep = () => {
     const context = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = context.createOscillator();
@@ -41,6 +47,7 @@ function TimerContent() {
     oscillator.stop(context.currentTime + 0.1);
   };
 
+  // timer principal
   useEffect(() => {
     if (timeLeft > 0 && isTimerRunning) {
       const timer = setInterval(() => {
@@ -59,17 +66,20 @@ function TimerContent() {
     }
   }, [timeLeft, isTimerRunning, currentProcess, processes.developer.time]);
 
+  // formatte le temps
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   }
 
+  // calcule la progression
   const calculateProgress = () => {
     const totalTime = processes[currentProcess].time
     return ((totalTime - timeLeft) / totalTime) * 100
   }
 
+  // sélection ISO
   const handleISOSelect = async (iso) => {
     setSelectedISO(iso)
     try {
@@ -94,12 +104,14 @@ function TimerContent() {
     }
   }
 
+  // sélection étape process
   const handleProcessSelect = (process) => {
     setCurrentProcess(process)
     setTimeLeft(processes[process].time)
     setIsTimerRunning(false)
   }
 
+  // play/pause timer
   const handlePlayPause = () => {
     if (!isTimerRunning) {
       try {
@@ -146,6 +158,7 @@ function TimerContent() {
     )
   }
 
+  // rendu principal
   return (
     <div className={`min-h-screen relative overflow-hidden ${isDarkMode ? 'text-white' : 'text-black'}`}>
       <Background isDarkMode={isDarkMode} />
@@ -247,7 +260,7 @@ function TimerContent() {
                             className="absolute inset-0 flex items-center justify-center"
                           >
                             <span className="text-white text-3xl sm:text-4xl">
-                              {isTimerRunning ? '❚❚' : '▶'}
+                              {isTimerRunning ? '\u275a\u275a' : '\u25b6'}
                             </span>
                           </button>
                         </div>
@@ -287,20 +300,11 @@ function TimerContent() {
   )
 }
 
+// composant exporté
 export default function Timer() {
-  const { isDarkMode } = useTheme()
-  
   return (
-    <Suspense fallback={
-      <div className={`min-h-screen relative overflow-hidden ${isDarkMode ? 'text-white' : 'text-black'}`}>
-        <Background isDarkMode={isDarkMode} />
-        
-        <div className="relative flex items-center justify-center">
-          <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${isDarkMode ? 'border-white' : 'border-black'}`}></div>
-        </div>
-      </div>
-    }>
+    <Suspense>
       <TimerContent />
     </Suspense>
   )
-} 
+}

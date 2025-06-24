@@ -1,7 +1,8 @@
+// API - Temps de développement film/développeur
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-// Mapping from friendly names to Prisma model names
+// Mapping des noms pour Prisma
 const filmToModelMap = {
   'Tri-X 400': 'trix400',
   'T-MAX 400': 'tmax400',
@@ -18,24 +19,20 @@ const devToModelMap = {
   'Ilfotec LC-29': 'ilfoteclc29',
 }
 
+// Récupère le temps de développement
 export async function POST(request) {
   try {
     const { film, developer, iso } = await request.json()
-
     const filmModelKey = filmToModelMap[film]
     const devModelKey = devToModelMap[developer]
-
     if (!filmModelKey || !devModelKey) {
       return NextResponse.json(
         { error: 'Unknown film or developer' },
         { status: 400 }
       )
     }
-
-    // Construct the prisma model key, e.g., "trix400rodinal"
+    // Construit le nom du modèle Prisma
     const modelName = `${filmModelKey}${devModelKey}`
-
-    // Ensure the model exists on the Prisma client before calling it
     if (!prisma[modelName]) {
       console.error(`Prisma model not found: ${modelName}`)
       return NextResponse.json(
@@ -43,7 +40,6 @@ export async function POST(request) {
         { status: 404 }
       )
     }
-
     const result = await prisma[modelName].findFirst({
       where: {
         asa_iso: parseInt(iso),
@@ -53,20 +49,17 @@ export async function POST(request) {
         dilution: true,
       },
     })
-
     if (!result) {
       return NextResponse.json(
         { error: 'Development time not found for the specified ISO' },
         { status: 404 }
       )
     }
-
-    // Ensure time is always returned as a number
+    // Retourne le temps sous forme de nombre
     const time =
       typeof result.time_35mm === 'string'
       ? parseFloat(result.time_35mm) 
       : Number(result.time_35mm)
-
     return NextResponse.json({ 
       time,
       dilution: result.dilution,
