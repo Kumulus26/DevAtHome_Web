@@ -26,16 +26,13 @@ export default function About() {
       <Background isDarkMode={isDarkMode} />
       
       <div className="relative">
-        // navbar
         <Navbar 
           isDarkMode={isDarkMode}
           onThemeToggle={toggleTheme}
         />
         
-        // section principale
         <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            // colonne image
             <div className="relative">
               <div className="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden relative">
                 <div className={`absolute inset-0 bg-gradient-to-br ${
@@ -44,7 +41,7 @@ export default function About() {
                 <Image src="/images/profile.jpeg" alt="About" fill className="object-cover" />
               </div>
             </div>
-            // colonne texte
+            
             <div>
               <h1 className={`text-6xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 Hi there!
@@ -53,7 +50,6 @@ export default function About() {
                 Fuelled by a passion for programming and photography, I have a deep desire to excel and 
                 continuously improve in my work. <br></br>Learn more about my journey below.
               </p>
-              // réseaux sociaux
               <div className="flex space-x-6 mt-8">
                 <a
                   href="https://github.com/Kumulus26"
@@ -89,11 +85,9 @@ export default function About() {
             </div>
           </div>
         </div>
-        // section carrière
         <div className={`${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} py-20`}>
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              // texte carrière
               <div>
                 <h2 className={`text-4xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   What I've learned with this project
@@ -106,7 +100,6 @@ export default function About() {
                   I'll share more details about this soon...
                 </p>
               </div>
-              // compétences
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill, index) => (
                   <span
